@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记8"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/15/《Python源码剖析》阅读笔记8/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记8 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记8
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-15
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#向list中插入元素"><span class="toc-text">向list中插入元素</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>list</code>对象的插入操作。<br><a id="more"></a></p>
+<h2 id="向list中插入元素"><a href="#向list中插入元素" class="headerlink" title="向list中插入元素"></a>向list中插入元素</h2><p>在完成对于<code>Python</code>的<code>list</code>对象的插入操作时，<code>Python</code>内部会调用<code>PyList_Insert</code>函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span></span><br><span class="line">PyList_Insert(PyObject *op, Py_ssize_t where, PyObject *newitem)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (!PyList_Check(op)) &#123;</span><br><span class="line">        PyErr_BadInternalCall();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ins1((PyListObject *)op, where, newitem);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从代码中可以看出来，这个方法并没有实际完成<strong>插入</strong>这个动作，而是调用了另一个函数<code>ins1</code>：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">ins1(PyListObject *self, Py_ssize_t where, PyObject *v)</span><br><span class="line">&#123;</span><br><span class="line">    Py_ssize_t i, n = Py_SIZE(self);</span><br><span class="line">    PyObject **items;</span><br><span class="line">    <span class="keyword">if</span> (v == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        PyErr_BadInternalCall();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (n == PY_SSIZE_T_MAX) &#123;</span><br><span class="line">        PyErr_SetString(PyExc_OverflowError,</span><br><span class="line">            <span class="string">"cannot add more objects to list"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (list_resize(self, n+<span class="number">1</span>) &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (where &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        where += n;</span><br><span class="line">        <span class="keyword">if</span> (where &lt; <span class="number">0</span>)</span><br><span class="line">            where = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (where &gt; n)</span><br><span class="line">        where = n;</span><br><span class="line">    items = self-&gt;ob_item;</span><br><span class="line">    <span class="keyword">for</span> (i = n; --i &gt;= where; )</span><br><span class="line">        items[i+<span class="number">1</span>] = items[i];</span><br><span class="line">    Py_INCREF(v);</span><br><span class="line">    items[where] = v;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>ins1</code>函数会先检查元素的有效性和<code>list</code>的大小的有效性，然后调整内存。<br>调整内存是插入元素很关键的一环，用来调整内存的<code>list_resize</code>函数代码如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">list_resize(PyListObject *self, Py_ssize_t newsize)</span><br><span class="line">&#123;</span><br><span class="line">    PyObject **items;</span><br><span class="line">    <span class="keyword">size_t</span> new_allocated;</span><br><span class="line">    Py_ssize_t allocated = self-&gt;allocated;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Bypass realloc() when a previous overallocation is large enough</span></span><br><span class="line"><span class="comment">       to accommodate the newsize.  If the newsize falls lower than half</span></span><br><span class="line"><span class="comment">       the allocated size, then proceed with the realloc() to shrink the list.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">if</span> (allocated &gt;= newsize &amp;&amp; newsize &gt;= (allocated &gt;&gt; <span class="number">1</span>)) &#123;</span><br><span class="line">        assert(self-&gt;ob_item != <span class="literal">NULL</span> || newsize == <span class="number">0</span>);</span><br><span class="line">        Py_SIZE(self) = newsize;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* This over-allocates proportional to the list size, making room</span></span><br><span class="line"><span class="comment">     * for additional growth.  The over-allocation is mild, but is</span></span><br><span class="line"><span class="comment">     * enough to give linear-time amortized behavior over a long</span></span><br><span class="line"><span class="comment">     * sequence of appends() in the presence of a poorly-performing</span></span><br><span class="line"><span class="comment">     * system realloc().</span></span><br><span class="line"><span class="comment">     * The growth pattern is:  0, 4, 8, 16, 25, 35, 46, 58, 72, 88, ...</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    new_allocated = (newsize &gt;&gt; <span class="number">3</span>) + (newsize &lt; <span class="number">9</span> ? <span class="number">3</span> : <span class="number">6</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* check for integer overflow */</span></span><br><span class="line">    <span class="keyword">if</span> (new_allocated &gt; SIZE_MAX - newsize) &#123;</span><br><span class="line">        PyErr_NoMemory();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        new_allocated += newsize;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (newsize == <span class="number">0</span>)</span><br><span class="line">        new_allocated = <span class="number">0</span>;</span><br><span class="line">    items = self-&gt;ob_item;</span><br><span class="line">    <span class="keyword">if</span> (new_allocated &lt;= (SIZE_MAX / <span class="keyword">sizeof</span>(PyObject *)))</span><br><span class="line">        PyMem_RESIZE(items, PyObject *, new_allocated);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        items = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">if</span> (items == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        PyErr_NoMemory();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    self-&gt;ob_item = items;</span><br><span class="line">    Py_SIZE(self) = newsize;</span><br><span class="line">    self-&gt;allocated = new_allocated;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果<code>newsize</code>在<code>[allocated/2, allocated]</code>区间内，那就什么都不做，只将原<code>list</code>的<code>size</code>调整为<code>newsize</code>，如果不在这个区间内，则调用<code>realloc</code>，重新分配内存空间。</p>
+<p>其中，</p>
+<blockquote>
+<p>当<code>newsize</code>与<code>allocated</code>的关系满足<code>newsize &lt; allcated/2</code>的时候，<code>Python</code>甚至还会通过<code>realloc</code>来收缩列表的内存空间，真是恨不得把一个字节掰成两个字节来用。</p>
+</blockquote>
+<p><em>（不过我并没有看懂上面引用的这段话是如何实现的，在这里要记录一下。）</em></p>
+<p>调整内存之后，<code>list</code>对象中有了足够的空间，就将插入元素之后的元素都向后移动一个位置，在插入坐标为新的元素空出位置。</p>
+<p><code>Python</code>支持负值索引，所以这里有一个比较特殊的操作：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (where &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    where += n;</span><br><span class="line">    <span class="keyword">if</span> (where &lt; <span class="number">0</span>)</span><br><span class="line">        where = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>用来将负值索引转化成正确的索引。</p>
+<p>和插入非常相似的另一个操作是在<code>list</code>的末尾追加元素，也就是在<code>len(list)</code>这个位置上插入一个元素，这个操作在<code>Python</code>中被称为<code>append</code>，在实现中则调用<code>PyList_Append</code>这个函数：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span></span><br><span class="line">PyList_Append(PyObject *op, PyObject *newitem)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (PyList_Check(op) &amp;&amp; (newitem != <span class="literal">NULL</span>))</span><br><span class="line">        <span class="keyword">return</span> app1((PyListObject *)op, newitem);</span><br><span class="line">    PyErr_BadInternalCall();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如<code>PyList_Insert</code>一样，这个函数也只是调用了另外一个函数，<code>app1</code>：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">app1(PyListObject *self, PyObject *v)</span><br><span class="line">&#123;</span><br><span class="line">    Py_ssize_t n = PyList_GET_SIZE(self);</span><br><span class="line"></span><br><span class="line">    assert (v != <span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">if</span> (n == PY_SSIZE_T_MAX) &#123;</span><br><span class="line">        PyErr_SetString(PyExc_OverflowError,</span><br><span class="line">            <span class="string">"cannot add more objects to list"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (list_resize(self, n+<span class="number">1</span>) &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    Py_INCREF(v);</span><br><span class="line">    PyList_SET_ITEM(self, n, v);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>和插入操作的逻辑基本一致，只是不需要调整其他元素的位置，使用<code>PyList_SET_ITEM</code>完成目标元素是索引的连接工作。其中<code>n</code>是<code>append</code>之前的<code>list</code>的大小，也是<code>append</code>之后新元素的下标。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/15/《Python源码剖析》阅读笔记8/">http://nagisa.co/2017/07/15/《Python源码剖析》阅读笔记8/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/17/《Python源码剖析》阅读笔记9/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记9</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/14/《Python源码剖析》阅读笔记7/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记7</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

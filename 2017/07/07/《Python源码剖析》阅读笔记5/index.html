@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记5"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/07/《Python源码剖析》阅读笔记5/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记5 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记5
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-07
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Python的字符串对象"><span class="toc-text">Python的字符串对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-3中的bytes对象"><span class="toc-text">Python 3中的bytes对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bytes对象的Hash值算法"><span class="toc-text">bytes对象的Hash值算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建PyBytesObject"><span class="toc-text">创建PyBytesObject</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他"><span class="toc-text">其他</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>开始探索<code>Python</code>中的字符串对象。<br><a id="more"></a></p>
+<h2 id="Python的字符串对象"><a href="#Python的字符串对象" class="headerlink" title="Python的字符串对象"></a>Python的字符串对象</h2><p>我之所以使用<code>Python 3</code>而不使用<code>Python 2</code>的原因之一就是<code>Python 3</code>原生支持<code>Unicode</code>。据说在<code>Python 2</code>中，想要让程序支持<strong>汉语</strong>是一件很麻烦的事儿。当然这事儿是道听途说，我也没做什么测试，毕竟我用<code>Python 2</code>只有非常短的一段时间。</p>
+<p>不过，<code>Python 3</code>中也没有了<code>PyStringObject</code>。</p>
+<p><code>Python 3</code>默认提供的<strong>字符串对象</strong>是<code>PyUnicodeObject</code>，而<code>Python 2</code>中的<code>PyStringObject</code>则大致和<code>Python 3</code>中的<code>PyBytesObject</code>对应。</p>
+<p>默认字符串对象是字符序列，(<code>Python 3</code>中)<code>bytes</code>则是原是字符串经过某种方式<strong>编码</strong>之后字节序列。举个例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">'我'</span>.encode(<span class="string">'gbk'</span>)</span><br><span class="line"><span class="string">b'\xce\xd2'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">'我'</span>.encode(<span class="string">'utf8'</span>)</span><br><span class="line"><span class="string">b'\xe6\x88\x91'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">'我'</span>.encode(<span class="string">'utf16'</span>)</span><br><span class="line"><span class="string">b'\xff\xfe\x11b'</span></span><br></pre></td></tr></table></figure></p>
+<p>同一个原始字符串经过不同编码的<code>encode</code>，得到了三个不同的<code>bytes</code>对象。</p>
+<p>反过来，一个<code>bytes</code>对象也可以通过<strong>解码</strong>(<code>decode</code>)得到字符串对象：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">b'\xe6\x88\x91'</span>.decode(<span class="string">'utf-8'</span>)</span><br><span class="line"><span class="string">'我'</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Python-3中的bytes对象"><a href="#Python-3中的bytes对象" class="headerlink" title="Python 3中的bytes对象"></a>Python 3中的bytes对象</h2><p><code>Python 2</code>中的字符串对象和<code>Python 3</code>中的<code>bytes</code>对象并不是完全对应的。如书中所给出的<code>PyStringObject</code>的声明如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[stringobject.h]</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    PyObject_VAR_HEAD</span><br><span class="line">    <span class="keyword">long</span> ob_shash;</span><br><span class="line">    <span class="keyword">int</span> ob_sstate;</span><br><span class="line">    <span class="keyword">char</span> ob_sval[<span class="number">1</span>];</span><br><span class="line">&#125; PyStringObject;</span><br></pre></td></tr></table></figure></p>
+<p><code>Python 3</code>中的<code>bytes</code>对象的声明则如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    PyObject_VAR_HEAD</span><br><span class="line">    Py_hash_t ob_shash;</span><br><span class="line">    <span class="keyword">char</span> ob_sval[<span class="number">1</span>];</span><br><span class="line">&#125; PyBytesObject;</span><br></pre></td></tr></table></figure></p>
+<p>和<code>PyStringObject</code>相比，<code>bytes</code>对象少了一个<code>ob_sstate</code>的结构体成员。</p>
+<blockquote>
+<p><code>PyStringObject</code>对象的<code>ob_sstate</code>变量标记了该对象是否已经过<code>intern</code>机制的处理</p>
+</blockquote>
+<p>除此之外两者的声明则完全一致。</p>
+<p>字符串的实际长度由<code>ob_size</code>成员维护。所以在字符串中间有<code>\0</code>也是允许的，这一点和<code>C</code>语言不同，不过字符串最后的一个字符必须是<code>\0</code>这一点倒是与<code>C</code>与相同，所以<code>Python 2</code>的<code>PyStringObject</code>和<code>Python 3</code>的<code>PyBytesObject</code>实际上都是指向了一块含有<code>ob_size + 1</code>个字节的内存，并且满足该内存的最后一个字节是<code>\0</code>，也就是<code>ob_sval[ob_size] == &#39;\0&#39;</code>。</p>
+<h2 id="bytes对象的Hash值算法"><a href="#bytes对象的Hash值算法" class="headerlink" title="bytes对象的Hash值算法"></a>bytes对象的Hash值算法</h2><p><code>Python 3</code>中的<code>Hash</code>值算法和<code>Python 2</code>中的也有区别。</p>
+<p><code>Python 2</code>中的<code>Hash</code>值是一个<code>unsigned long</code>整型，而<code>Python 3</code>中则是一个专门的<code>Py_hash_t</code>整型。后者是一个经过多层<code>typedef</code>之后的类型，原型是：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[pyconfig.h]</span><br><span class="line"><span class="comment">/* Define like size_t, omitting the "unsigned" */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> MS_WIN64</span></span><br><span class="line"><span class="keyword">typedef</span> __int64 <span class="keyword">ssize_t</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line"><span class="keyword">typedef</span> _W64 <span class="keyword">int</span> <span class="keyword">ssize_t</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure></p>
+<p>一个和编译器相关机器平台相关的整数类型。</p>
+<p>计算<code>Hash</code>值的函数使用的是<a href="https://github.com/majek" target="_blank" rel="noopener">Marek Majkowski</a> 实现的<a href="https://en.wikipedia.org/wiki/Daniel_J._Bernstein" target="_blank" rel="noopener">Dan Bernstein</a> 提出的<code>SipHash24</code>算法，算法的原始文件在<a href="https://github.com/majek/csiphash/" target="_blank" rel="noopener">前者的<code>GitHub</code>上</a>。</p>
+<p>无论是<code>bytes</code>类型还是<code>uniocde</code>类型，都是使用这个函数获取<code>Hash</code>值。</p>
+<h2 id="创建PyBytesObject"><a href="#创建PyBytesObject" class="headerlink" title="创建PyBytesObject"></a>创建PyBytesObject</h2><p>和<code>PyString_FromString</code>对应，<code>bytes</code>对象也有一个<code>PyBytes_FromString</code>的函数：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">[bytesobject.c]</span><br><span class="line">PyObject *</span><br><span class="line">PyBytes_FromString(<span class="keyword">const</span> <span class="keyword">char</span> *str)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">size_t</span> size;</span><br><span class="line">    PyBytesObject *op;</span><br><span class="line"></span><br><span class="line">    assert(str != <span class="literal">NULL</span>);</span><br><span class="line">    size = <span class="built_in">strlen</span>(str);</span><br><span class="line">    <span class="keyword">if</span> (size &gt; PY_SSIZE_T_MAX - PyBytesObject_SIZE) &#123;</span><br><span class="line">        PyErr_SetString(PyExc_OverflowError,</span><br><span class="line">            <span class="string">"byte string is too long"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (size == <span class="number">0</span> &amp;&amp; (op = nullstring) != <span class="literal">NULL</span>) &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> COUNT_ALLOCS</span></span><br><span class="line">        null_strings++;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">        Py_INCREF(op);</span><br><span class="line">        <span class="keyword">return</span> (PyObject *)op;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (size == <span class="number">1</span> &amp;&amp; (op = characters[*str &amp; UCHAR_MAX]) != <span class="literal">NULL</span>) &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> COUNT_ALLOCS</span></span><br><span class="line">        one_strings++;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">        Py_INCREF(op);</span><br><span class="line">        <span class="keyword">return</span> (PyObject *)op;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Inline PyObject_NewVar */</span></span><br><span class="line">    op = (PyBytesObject *)PyObject_MALLOC(PyBytesObject_SIZE + size);</span><br><span class="line">    <span class="keyword">if</span> (op == <span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> PyErr_NoMemory();</span><br><span class="line">    (<span class="keyword">void</span>)PyObject_INIT_VAR(op, &amp;PyBytes_Type, size);</span><br><span class="line">    op-&gt;ob_shash = <span class="number">-1</span>;</span><br><span class="line">    <span class="built_in">memcpy</span>(op-&gt;ob_sval, str, size+<span class="number">1</span>);</span><br><span class="line">    <span class="comment">/* share short strings */</span></span><br><span class="line">    <span class="keyword">if</span> (size == <span class="number">0</span>) &#123;</span><br><span class="line">        nullstring = op;</span><br><span class="line">        Py_INCREF(op);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (size == <span class="number">1</span>) &#123;</span><br><span class="line">        characters[*str &amp; UCHAR_MAX] = op;</span><br><span class="line">        Py_INCREF(op);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (PyObject *) op;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>对于<code>bytes</code>对象，虽然没有初始化一个对象池，但也用了类似的技术。当字符串是空字符串或者是单个字符组成的字符串时，这些对象也是会复用的。空字符串使用的是专门的一个变量<code>nullstring</code>，单字符字符串则使用一个数组<code>characters</code>。</p>
+<p>不过，对于<code>Python 3</code>中的<code>bytes</code>对象所能包含额度最大字符序列，这个值和<code>Python 2</code>的<code>str</code>对象略有区别，也就是<code>PY_SSIZE_T_MAX - PyBytesObject_SIZE</code>的值，这个值由于减去了<code>PyBytesObject_SIZE</code>值，略小于<code>2,147,483,647</code>，是<code>2,147,483,622</code>。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p><code>bytes</code>对象并没有<code>Intern</code>机制，但<code>PyUnicodeObejct</code>是有的。所以要想分析<code>Python 3</code>的<code>Intern</code>的机制，要分析<code>PyUnicodeObject</code>对象。</p>
+<p>下篇笔记再说。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/07/《Python源码剖析》阅读笔记5/">http://nagisa.co/2017/07/07/《Python源码剖析》阅读笔记5/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/11/《Python源码剖析》阅读笔记6/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记6</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/06/《Python源码剖析》阅读笔记4/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记4</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

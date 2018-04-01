@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="常用排序算法笔记(4) - 归并排序(Merge Sort)"/>
+
+
+
+
+  <meta name="keywords" content="Note, Sort Algorithm, Merge Sort, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/18/常用排序算法笔记-4-归并排序-Merge-Sort/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 常用排序算法笔记(4) - 归并排序(Merge Sort) - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          常用排序算法笔记(4) - 归并排序(Merge Sort)
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-18
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#归并排序"><span class="toc-text">归并排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码实现"><span class="toc-text">代码实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试"><span class="toc-text">测试</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>本文介绍了排序算法中的归并排序。<br><a id="more"></a></p>
+<h2 id="归并排序"><a href="#归并排序" class="headerlink" title="归并排序"></a>归并排序</h2><p><strong>归并排序(Merge Sort)</strong>的基本操作是合并两个已排序的表。<br><!-- more --><br>这是一个很简单的操作：</p>
+<p>例如将<code>1 13 24 26</code>和<code>2 15 27 38</code>合并，容易得到最终的结果<code>1 2 13 15 24 26 27 38</code>。</p>
+<p>其中的算法是分别使用两个指针指向两个表的初始元素，比较两个指针所指向的当前元素，将较小的一个放入结果的表中，该指针加<code>1</code>，重复这个过程。</p>
+<blockquote>
+<p>合并两个已排序的表的时间显然是线性的，因为最多进行了<code>N-1</code>次比较，其中<code>N</code>是元素的总数。</p>
+</blockquote>
+<blockquote>
+<p>因此，归并排序算法很容易描述。如果<code>N=1</code>，那么只有一个元素需要排序，答案是显然的。否则，递归地将前半部分数据和后半部分数据各自归并排序，得到排序后的两部分数据，然后使用上面描述的合并算法再将这两部分合并到一起。</p>
+</blockquote>
+<p>所以归并排序的实现分成三个部分，第一部分是调用归并排序的入口，第二部分是将大的问题分解成小的问题的方法，第三部分则是合并算法。这三个部分分别对应<code>MergeSort</code>，<code>MSort</code>和<code>Merge</code>三个方法。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Merge</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> tmps[], <span class="keyword">int</span> leftpos, <span class="keyword">int</span> rightpos, <span class="keyword">int</span> rightend)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, leftend, numeles, tmppos;</span><br><span class="line">    leftend = rightpos - <span class="number">1</span>;</span><br><span class="line">    tmppos = leftpos;</span><br><span class="line">    numeles = rightend - leftpos + <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span>(leftpos &lt;= leftend &amp;&amp; rightpos &lt;= rightend)</span><br><span class="line">        <span class="keyword">if</span>(eles[leftpos] &lt;= eles[rightpos])</span><br><span class="line">            tmps[tmppos ++] = eles[leftpos ++];</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            tmps[tmppos ++] = eles[rightpos ++];</span><br><span class="line">    <span class="keyword">while</span>(leftpos &lt;= leftend)</span><br><span class="line">        tmps[tmppos ++] = eles[leftpos ++];</span><br><span class="line">    <span class="keyword">while</span>(rightpos &lt;= rightend)</span><br><span class="line">        tmps[tmppos ++] = eles[rightpos ++];</span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; numeles; i ++, rightend --)</span><br><span class="line">        eles[rightend] = tmps[rightend];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> tmps[], <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> center;</span><br><span class="line">    <span class="keyword">if</span>(left &lt; right) &#123;</span><br><span class="line">        center = (left + right) / <span class="number">2</span>;</span><br><span class="line">        MSort(eles, tmps, left, center);</span><br><span class="line">        MSort(eles, tmps, center + <span class="number">1</span>, right);</span><br><span class="line">        Merge(eles, tmps, left, center + <span class="number">1</span>, right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MergeSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> *tmps;</span><br><span class="line">    tmps = <span class="built_in">malloc</span>(n * <span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">    <span class="keyword">if</span>(tmps) &#123;</span><br><span class="line">        MSort(eles, tmps, <span class="number">0</span>, n - <span class="number">1</span>);</span><br><span class="line">        <span class="built_in">free</span>(tmps);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"No space for temp array.\n"</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>归并排序每次会将问题分成两个部分来解决。但<code>Merge</code>方法并不关心两个进行合并的表的元素数量是不是相同，所以测试的时候将总数变成了<code>1000000</code>。</p>
+<p>下面给出其中一次的结果和简单的可视化：</p>
+<table>
+<thead>
+<tr>
+<th>MinValue</th>
+<th>MaxValue</th>
+<th>Numbers</th>
+<th>Used Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>16</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>31</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>31</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>200000</td>
+<td>47</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>200000</td>
+<td>63</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>200000</td>
+<td>46</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>300000</td>
+<td>94</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>300000</td>
+<td>94</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>300000</td>
+<td>78</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>400000</td>
+<td>94</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>400000</td>
+<td>94</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>400000</td>
+<td>109</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>500000</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>500000</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>500000</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>600000</td>
+<td>157</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>600000</td>
+<td>157</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>600000</td>
+<td>156</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>700000</td>
+<td>187</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>700000</td>
+<td>188</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>700000</td>
+<td>187</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>800000</td>
+<td>218</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>800000</td>
+<td>203</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>800000</td>
+<td>203</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>900000</td>
+<td>265</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>900000</td>
+<td>234</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>900000</td>
+<td>234</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1000000</td>
+<td>265</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1000000</td>
+<td>250</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1000000</td>
+<td>265</td>
+</tr>
+</tbody>
+</table>
+<p><canvas style="margin:0px 20%;width: 60%; background-color: gray;" id="blue"></canvas></p>
+<script type="text/javascript">
+        var data = [16, 31, 31, 47, 63, 46, 94, 94, 78, 94, 94, 109, 125, 125, 125, 157, 157, 156, 187, 188, 187, 218, 203, 203, 265, 234, 234, 265, 250, 265]
+        var canvas = document.getElementById('blue')
+        var ctx = canvas.getContext("2d")
+        canvas.width = canvas.offsetWidth
+        canvas.height = canvas.offsetHeight
+
+        var widht = canvas.offsetWidth
+        var height = canvas.offsetHeight
+        var delta = canvas.offsetWidth / 12
+        var x = 0
+        var max = 0
+        for(var k = 1; k < 4; k++) {
+            if(data[data.length - k] > max)
+                max = data[data.length - k]
+        }
+        ctx.fillStyle = 'black'
+        for(var i = 0; i < 30; i += 3) {
+            x += delta
+            for(var j = 0; j < 3; j ++) {
+                var y = Math.floor(data[i+j]/max * height * 0.9)
+                ctx.beginPath()
+                ctx.arc(Math.floor(x), height - y, 3, 0, 2*Math.PI, true)
+                ctx.fill()
+            }
+        }
+</script>
+
+<blockquote>
+<p>该算法（归并排序）是景点的分治(divide-and-conquer)策略，它将问题分成一些小的问题然后递归求解，而治的阶段则将分的阶段解得的各个答案修补到一起。分治是递归非常有利的用法，我们将会多次遇到。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/18/常用排序算法笔记-4-归并排序-Merge-Sort/">http://nagisa.co/2017/06/18/常用排序算法笔记-4-归并排序-Merge-Sort/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Note/">Note</a>
+            
+              <a href="/tags/Sort-Algorithm/">Sort Algorithm</a>
+            
+              <a href="/tags/Merge-Sort/">Merge Sort</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/18/常用排序算法笔记-5-快速排序-Quick-Sort/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">常用排序算法笔记(5) - 快速排序(Quick Sort)</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/17/常用排序算法笔记-3-堆排序-Heap-Sort/">
+        <span class="next-text nav-default">常用排序算法笔记(3) - 堆排序(Heap Sort)</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

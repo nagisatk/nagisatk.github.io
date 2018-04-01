@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="Static blog on Github Pages using Hexo"/>
+
+
+
+
+  <meta name="keywords" content="Record, Note, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/02/Static-blog-on-Github-Pages-using-Hexo/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> Static blog on Github Pages using Hexo - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          Static blog on Github Pages using Hexo
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-02
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Hexo"><span class="toc-text">Hexo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#开始使用"><span class="toc-text">开始使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写博客"><span class="toc-text">写博客</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#部署到Github-Pages"><span class="toc-text">部署到Github Pages</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>终于买了域名，开始在Github Pages上写技术博客，虽然说是技术博客，但大概也没什么高深的技术。希望自己可以一直写下去吧。</p>
+<p>由于这个静态博客是用Hexo搭建的，所以第一篇就记录一下使用Hexo搭建博客的过程吧。<br><a id="more"></a></p>
+<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>的自我介绍是“一个快速、简洁且高效的博客框架”。由于对中文的出色支持而在国内拥趸很多，我也是随大流的一员，所以也就用了Hexo。其实Hexo使用起来十分简单，昨天我大部分时间都花在了挑一个喜欢的主题上了，囧rz。</p>
+<p>首先，安装一下<code>Node.js</code>和<code>Git</code>，如果是Windows用户，从各自的官网上下载安装就好了。</p>
+<ul>
+<li><a href="http://nodejs.org/" target="_blank" rel="noopener">Node.js</a></li>
+<li><a href="http://git-scm.com/" target="_blank" rel="noopener">Git</a></li>
+</ul>
+<p>如果是Linux，那就直接命令行，例如Debian系列：<code>sudo apt-get install git</code>。只是单纯的举个例子，Hexo的<a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">官方文档</a>中提供了安装的教程，很简单。</p>
+<p>其次就要安装Hexo了。在安装上了上述软件之后，安装Hexo是一件非常简单的事情，只需要执行下边的命令：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure></p>
+<p><code>npm</code>是<code>Node.js</code>自带的包管理软件，安装了Nodejs之后就直接可以用了。</p>
+<p>其中<code>-g</code>选项的含义是全局（<code>global</code>）安装，这样安装之后可以直接在命令行中使用，例如Windows的cmd或者PowerShell，强烈推荐使用后者。</p>
+<h2 id="开始使用"><a href="#开始使用" class="headerlink" title="开始使用"></a>开始使用</h2><p>接下来可以用Hexo搭建静态博客了。</p>
+<p>先选择一个文件夹，例如我使用的文件夹是<code>D盘</code>下的一个名叫<code>HexoBlog</code>的文件夹。</p>
+<p>在<code>PowerShell</code>中<code>cd</code>到这个文件夹中（这里简单说一下<code>CMD</code>和<code>PowerShell</code>中<code>cd</code>命令的不同。如果在<code>CMD</code>中，可以先切换到<code>D盘</code>，再<code>cd</code>到目标文件夹，也可以加上<code>/d</code>选项，就是<code>cd /d D:\HexoBlog\</code>。但在<code>PowerShell</code>中，已经没有<code>/d</code>选项了。<code>cd D:\HexoBlog\</code>可以直接到达<code>HexoBlog</code>文件夹。），在这个文件夹中执行下边的命令：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo init</span><br></pre></td></tr></table></figure></p>
+<p>完成之后，一个静态博客的框架就初始化完成了。</p>
+<p>如果想要看这个博客的效果（内容只有一篇Hello World），就执行：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo generate</span><br><span class="line">hexo server</span><br></pre></td></tr></table></figure></p>
+<p>上面的命令等同于：<code>hexo g</code>和<code>hexo s</code>。目前，Hexo默认使用的主题是<code>landscape</code>，其实还挺好看的，但是我不是很喜欢，所以昨天挑了半天。现在我使用的一个叫<code>pln</code>的主题。后续有时间的话，可能会研究一下这个主题的实现，然后做一些改动。</p>
+<p>到现在为止，虽然还一个字都没写，但是博客已经搭建完成了。</p>
+<h2 id="写博客"><a href="#写博客" class="headerlink" title="写博客"></a>写博客</h2><p>目前写技术博客（别的博客大概也差不多），都在使用<code>Markdown</code>，Hexo当然也支持<code>Markdown</code>。上述的<code>hexo g</code>完成的主要工作之一就是将<code>.md</code>文件解析成<code>HTML</code>代码。</p>
+<p><code>Markdown</code>的语法就不介绍了，直接进入写博客的过程吧。</p>
+<p>在命令行中执行下边的命令：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new 'Blog Title'</span><br></pre></td></tr></table></figure></p>
+<p>如果文章标题中不含有空格，不使用引号也可以。输入之后可以看到如下的提示信息：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INFO  Created: D:\HexoBlog\source\_posts\Blog-Title.md</span><br></pre></td></tr></table></figure></p>
+<p>找到这个文件之后就可以在其中写作了。<br>自动生成的<code>.md</code>文件不是空的，其中有几行文字：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: Blog Title</span><br><span class="line">date: 2017-06-03 21:48:46</span><br><span class="line">tags:</span><br><span class="line">---</span><br></pre></td></tr></table></figure></p>
+<p>这几行文字是给<code>Markdown</code>渲染器和Hexo的博客管理系统使用的。添加tags的方式之一为：<code>tags: [tags1, tags2]</code>。</p>
+<p>之后再执行<code>hexo g</code>和<code>hexo s</code>就可以看到效果了。当然，在<code>hexo g</code>之前最好先<code>hexo clean</code>一下，把之前生成的博客都删掉，重新生成一遍。</p>
+<h2 id="部署到Github-Pages"><a href="#部署到Github-Pages" class="headerlink" title="部署到Github Pages"></a>部署到Github Pages</h2><p>最后一件事来了，将搭建好的博客部署到Github Pages。</p>
+<p>在Hexo的配置文件<code>_config.yml</code>中，有<code>deploy</code>的配置项。</p>
+<p>部署到Github Pages需要做以下配置：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: &lt;repository url&gt;</span><br><span class="line">  branch: [branch]</span><br><span class="line">  message: [message]</span><br></pre></td></tr></table></figure></p>
+<p>配置项的含义如下（摘自<a href="https://hexo.io/zh-cn/docs/deployment.html" target="_blank" rel="noopener">官方文档</a>）：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>repo</td>
+<td>库（Repository）地址</td>
+</tr>
+<tr>
+<td>branch</td>
+<td>分支名称。如果您使用的是 GitHub 或 GitCafe 的话，程序会尝试自动检测。</td>
+</tr>
+<tr>
+<td>message</td>
+<td>自定义提交信息 (默认为 Site updated:  now(‘YYYY-MM-DD HH:mm:ss’) )</td>
+</tr>
+</tbody>
+</table>
+<p>将这些配置好之后，就可以用<code>hexo deploy</code>部署啦。</p>
+<p>PS: 如果部署报错了，那可能是因为<code>hexo-deployer-git</code>没有装，使用<code>npm</code>安装一下就可以了：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/02/Static-blog-on-Github-Pages-using-Hexo/">http://nagisa.co/2017/06/02/Static-blog-on-Github-Pages-using-Hexo/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Record/">Record</a>
+            
+              <a href="/tags/Note/">Note</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/08/JavaScript的粒子效果库-particles-js/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">JavaScript的粒子效果库: particles.js</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记15"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/09/11/《Python源码剖析》阅读笔记15/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记15 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记15
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-09-11
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Unicode字符支持"><span class="toc-text">Unicode字符支持</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Python-3的处理办法"><span class="toc-text">Python 3的处理办法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他"><span class="toc-text">其他</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>好久没有写这个笔记了。在进入高级主题之前，想要写一点关于<code>Python 3</code>中的字符串对象的东西。因为和<code>Python 2</code>中的字符串区别比较大，所以想要多写一点。但是一直没有写。</p>
+<p>虽然可能会写得比较短，但是还是赶紧把这部分过去，继续读书吧。</p>
+<p>这部分关于<code>Python 3</code>的字符串的编码问题。</p>
+<a id="more"></a>
+<h1 id="Unicode字符支持"><a href="#Unicode字符支持" class="headerlink" title="Unicode字符支持"></a>Unicode字符支持</h1><p><code>Python 3</code>原生支持<code>Unicode</code>字符，也就是如下的代码是合法的：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>我 = <span class="string">'大熊'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>我</span><br><span class="line"><span class="string">'大熊'</span></span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure></p>
+<p>但是以上的代码在<code>Python 2</code>中是无法运行的：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>我 = <span class="string">'大熊'</span></span><br><span class="line">  File <span class="string">"&lt;stdin&gt;"</span>, line <span class="number">1</span></span><br><span class="line">    我 = <span class="string">'大熊'</span></span><br><span class="line">    ^</span><br><span class="line">SyntaxError: invalid syntax</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure></p>
+<p><code>Python 3</code>的字符串主要是实现了<a href="https://www.python.org/dev/peps/pep-0393/" target="_blank" rel="noopener"><code>PEP 393</code></a>。</p>
+<p> <code>Unicode</code>字符的支持并不是非常简单的事情。</p>
+<p><code>Python 2</code>中的字符串不支持<code>Unicode</code>字符是因为它使用的字符集太小，无法容纳所有的<code>Unicode</code>字符，每个字符用一个字节表示，最多只能表示<code>256</code>个不同的字符。</p>
+<p>这个字符集是<code>ASCII</code>字符集，只包含很少的（相对于<code>Unicode</code>）可打印字符。</p>
+<p>而<code>Unicode</code>字符集则包含世界上所有语言的所有符号（理想）。</p>
+<p>当然，由于<code>Unicode</code>并没有规定字符的存储方式，所以也有不同的存储方式来存储<code>Unicode</code>字符，这就是所谓的编码集，最常见的编码集是<code>UTF-8</code>，这是一种变长编码，每个字符可能使用<code>1~4</code>个字节来表示，例如英文字母<code>ABC...</code>等等只使用一个字节表示，但是每个汉字则使用三个字节表示。</p>
+<p>这种编码方式的优点是在大量使用拉丁字母的语言中十分节省存储空间。</p>
+<p>但这种编码方式也有明显的缺点，由于每个字符所用的空间不固定，给字符串处理带来了困难。</p>
+<h1 id="Python-3的处理办法"><a href="#Python-3的处理办法" class="headerlink" title="Python 3的处理办法"></a>Python 3的处理办法</h1><p>为了在节省空间和字符串处理中间求得平衡，<code>Python 3</code>字符串有多种内部表示，使用哪种表示方法取决于占用最大空间的字符，可以选择使用<code>1, 2, 4</code>字节表示的方法，可以通过<code>PyUnicode_KIND(op)</code>宏获取表示方法，可能的取值如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> PyUnicode_Kind &#123;</span><br><span class="line">    PyUnicode_WCHAR_KIND = <span class="number">0</span>, <span class="comment">// 不会获取这个值</span></span><br><span class="line">    PyUnicode_1BYTE_KIND = <span class="number">1</span>,</span><br><span class="line">    PyUnicode_2BYTE_KIND = <span class="number">2</span>,</span><br><span class="line">    PyUnicode_4BYTE_KIND = <span class="number">4</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>使用统一的字长表示字符可以获得更好的字符串处理性能。</p>
+<p>字符串的声明如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  PyObject_HEAD</span><br><span class="line">  Py_ssize_t length;</span><br><span class="line">  Py_hash_t hash;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">      <span class="keyword">unsigned</span> <span class="keyword">int</span> interned:<span class="number">2</span>;</span><br><span class="line">      <span class="keyword">unsigned</span> <span class="keyword">int</span> kind:<span class="number">2</span>;</span><br><span class="line">      <span class="keyword">unsigned</span> <span class="keyword">int</span> compact:<span class="number">1</span>;</span><br><span class="line">      <span class="keyword">unsigned</span> <span class="keyword">int</span> ascii:<span class="number">1</span>;</span><br><span class="line">      <span class="keyword">unsigned</span> <span class="keyword">int</span> ready:<span class="number">1</span>;</span><br><span class="line">  &#125; state;</span><br><span class="line">  <span class="keyword">wchar_t</span> *wstr;</span><br><span class="line">&#125; PyASCIIObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  PyASCIIObject _base;</span><br><span class="line">  Py_ssize_t utf8_length;</span><br><span class="line">  <span class="keyword">char</span> *utf8;</span><br><span class="line">  Py_ssize_t wstr_length;</span><br><span class="line">&#125; PyCompactUnicodeObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  PyCompactUnicodeObject _base;</span><br><span class="line">  <span class="keyword">union</span> &#123;</span><br><span class="line">      <span class="keyword">void</span> *any;</span><br><span class="line">      Py_UCS1 *latin1;</span><br><span class="line">      Py_UCS2 *ucs2;</span><br><span class="line">      Py_UCS4 *ucs4;</span><br><span class="line">  &#125; data;</span><br><span class="line">&#125; PyUnicodeObject;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，<code>Python 3</code>嵌套声明了不同层级的字符串对象，可以用不同的方式存储不同的字符串，以便节省内存空间。</p>
+<p>为了和外部的程序交互，字符串的内部表示默认采用<code>UTF-8</code>编码集。(<code>PEP 393</code>)</p>
+<p>在<code>Python 3</code>内部处理字符串则根据字符串的最大字符有不同的处理方式。</p>
+<p>例如，在<code>Python 3</code>的字符串查找算法的代码如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Py_ssize_t</span><br><span class="line">any_find_slice(PyObject* s1, PyObject* s2,</span><br><span class="line">               Py_ssize_t start,</span><br><span class="line">               Py_ssize_t end,</span><br><span class="line">               <span class="keyword">int</span> direction)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> kind1, kind2;</span><br><span class="line">    <span class="keyword">void</span> *buf1, *buf2;</span><br><span class="line">    Py_ssize_t len1, len2, result;</span><br><span class="line"></span><br><span class="line">    kind1 = PyUnicode_KIND(s1);</span><br><span class="line">    kind2 = PyUnicode_KIND(s2);</span><br><span class="line">    <span class="comment">// [1]</span></span><br><span class="line">    <span class="keyword">if</span> (kind1 &lt; kind2)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    len1 = PyUnicode_GET_LENGTH(s1);</span><br><span class="line">    len2 = PyUnicode_GET_LENGTH(s2);</span><br><span class="line">    ADJUST_INDICES(start, end, len1);</span><br><span class="line">    <span class="keyword">if</span> (end - start &lt; len2)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    buf1 = PyUnicode_DATA(s1);</span><br><span class="line">    buf2 = PyUnicode_DATA(s2);</span><br><span class="line">    <span class="comment">// [2]</span></span><br><span class="line">    <span class="keyword">if</span> (len2 == <span class="number">1</span>) &#123;</span><br><span class="line">        Py_UCS4 ch = PyUnicode_READ(kind2, buf2, <span class="number">0</span>);</span><br><span class="line">        result = findchar((<span class="keyword">const</span> <span class="keyword">char</span> *)buf1 + kind1*start,</span><br><span class="line">                          kind1, end - start, ch, direction);</span><br><span class="line">        <span class="keyword">if</span> (result == <span class="number">-1</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> start + result;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// [3]</span></span><br><span class="line">    <span class="keyword">if</span> (kind2 != kind1) &#123;</span><br><span class="line">        buf2 = _PyUnicode_AsKind(s2, kind1);</span><br><span class="line">        <span class="keyword">if</span> (!buf2)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-2</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (direction &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="comment">// [4]</span></span><br><span class="line">        <span class="keyword">switch</span> (kind1) &#123;</span><br><span class="line">        <span class="keyword">case</span> PyUnicode_1BYTE_KIND:</span><br><span class="line">            <span class="keyword">if</span> (PyUnicode_IS_ASCII(s1) &amp;&amp; PyUnicode_IS_ASCII(s2))</span><br><span class="line">                result = asciilib_find_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                result = ucs1lib_find_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> PyUnicode_2BYTE_KIND:</span><br><span class="line">            result = ucs2lib_find_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> PyUnicode_4BYTE_KIND:</span><br><span class="line">            result = ucs4lib_find_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            assert(<span class="number">0</span>); result = <span class="number">-2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// [5]</span></span><br><span class="line">        <span class="keyword">switch</span> (kind1) &#123;</span><br><span class="line">        <span class="keyword">case</span> PyUnicode_1BYTE_KIND:</span><br><span class="line">            <span class="keyword">if</span> (PyUnicode_IS_ASCII(s1) &amp;&amp; PyUnicode_IS_ASCII(s2))</span><br><span class="line">                result = asciilib_rfind_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                result = ucs1lib_rfind_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> PyUnicode_2BYTE_KIND:</span><br><span class="line">            result = ucs2lib_rfind_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> PyUnicode_4BYTE_KIND:</span><br><span class="line">            result = ucs4lib_rfind_slice(buf1, len1, buf2, len2, start, end);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            assert(<span class="number">0</span>); result = <span class="number">-2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (kind2 != kind1)</span><br><span class="line">        PyMem_Free(buf2);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>[1]</code>处的判断是指如果要查找的字符串包含源字符串的表示方法无法容纳的字符，那么一定找不到目标字符串：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>src = <span class="string">"This is a String."</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>target = <span class="string">"目标"</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>src.find(target)</span><br><span class="line"><span class="number">-1</span></span><br></pre></td></tr></table></figure></p>
+<p>在上述代码中，<code>src</code>会使用<code>PyUnicode_1BYTE_KIND</code>的形式存储，<code>target</code>则会使用<code>PyUnicode_4BYTE_KIND</code>，后者包含前者无法表示的字符，那么也就一定不会在前者中存在。</p>
+<p><code>[2]</code>处的代码是当目标字符串只有一个字节的时候调用特定的方法处理。这不是本篇的重点，所以不多赘述。</p>
+<p><code>[3]</code>处的代码，在两个字符串不使用相同的编码方式的时候，例如要查找的字符串是<code>ASCII-only</code>字符串，而源字符串则是<code>Unicode</code>字符串，由于两种用于表示单个字符的字节数不同，需要使用<code>_PyUnicode_AsKind(PyObject *s, unsigned int kind)</code>函数将要查找的字符串的字符扩大到和源字符串相同。</p>
+<p>这个函数的注释如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Widen Unicode objects to larger buffers. Don't write terminating null</span></span><br><span class="line"><span class="comment">   character. Return NULL on error. */</span></span><br></pre></td></tr></table></figure></p>
+<p><code>[4]</code>和<code>[5]</code>处的两个<code>switch</code>结构则根据字符大小的不同和查找方向不同调用不同的查找方法。</p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><p>尽管还没有完全地看完这部分代码，但关于<code>Python 3</code>字符串的实现已经有了大体的了解。</p>
+<p>准备把<code>PEP 393</code>翻译一下。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/09/11/《Python源码剖析》阅读笔记15/">http://nagisa.co/2017/09/11/《Python源码剖析》阅读笔记15/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/09/18/浮点数的精度问题/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">浮点数的精度问题</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/08/10/《Python源码剖析》阅读笔记14/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记14</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

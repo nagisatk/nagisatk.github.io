@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记10"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/18/《Python源码剖析》阅读笔记10/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记10 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记10
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-18
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Hash-Table"><span class="toc-text">Hash Table</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python使用开放定址法的注意事项"><span class="toc-text">Python使用开放定址法的注意事项</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>Python</code>中的<code>dict</code>对象，散列表简述。<br><a id="more"></a><br>《<code>Python</code>源码剖析》第一部分<strong>内建对象</strong>中的最后一个对象是<code>PyDictObject</code>，也就是<code>dict</code>对象。在别的语言中类似的对象可能叫做<code>Map</code>，或者<code>Hash Table</code>。</p>
+<p>这是一种表现为存储形如<code>key:value</code>(<strong>键值对</strong>)的数据的数据结构，用户可以通过索引<code>key</code>来获取对应的<code>value</code>值。对于数组或者<code>list</code>来说，内部的数据只能通过数字下标获取，但在<code>dict</code>中，<code>key</code>则可以是字符串(一般情况下，字符串是使用最多的<code>key</code>值类型)。</p>
+<h2 id="Hash-Table"><a href="#Hash-Table" class="headerlink" title="Hash Table"></a>Hash Table</h2><p><code>Python</code>中的<code>dict</code>对象的实现方式是一个<code>hash table</code>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/* Dictionary object implementation using a hash table */</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p><code>PyDictObject</code>没有如<code>map</code>(<em>指<code>C++</code>中的<code>std::map</code></em>)一样采用平衡二元树，而是采用了散列表（<code>hash table</code>），因为理论上，在最优情况下，散列表能提供<code>O(1)</code>复杂度的搜索效率。</p>
+</blockquote>
+<p>平衡二叉树（二元树）的好处在于存储空间和搜索效率之间的平衡，在最小的空间需求下，用户可以得到<code>O log N</code>的搜索时间复杂度。</p>
+<p>但对数的搜索时间复杂度在<code>Python</code>中是不可接受的，所以<code>Python</code>的实现选择了最优情况可以达到<code>O(1)</code>的搜索时间复杂度的散列表。</p>
+<blockquote>
+<p>散列表的基本思想，是通过一定的函数将需搜索的键值映射为一个整数，将这个整数视为索引值去访问某片连续的内存区域。</p>
+</blockquote>
+<p>在《数据结构与算法分析：<code>C</code>语言描述》这本书中，有专门的一章来讲解散列表这种数据结构，分析了散列表的各种实现方式，并给出了几种散列函数。</p>
+<p>然而散列表有一个必须要面对的问题。由于预想被插入到散列表中的数据是随机的，但散列函数所能得到的散列值是有限的。所以，一定会产生这样的冲突：<strong>前后插入散列表的不同元素，经过相同的散列函数所得到的散列值是一样的。</strong></p>
+<p>这时候就需要使用恰当的策略来应对，上述书中给出了两种不同的策略，其一是使用链表实现的分离链接法，其二是不使用链表的开放定址法。</p>
+<p>前者将具有相同散列值的元素使用链表连接起来，后者则是<code>Python</code>中的<code>dict</code>使用的散列方法。</p>
+<blockquote>
+<p>当产生散列冲突时，<code>Python</code>会通过一个二次探测函数<code>f</code>，计算下一个候选位置<code>addr</code>，如果位置<code>addr</code>可用，则可将待插入元素放到位置<code>addr</code>；如果位置<code>addr</code> 不可用，则<code>Python</code>会再次使用探测函数<code>f</code>，获得下一个候选位置，如此不断探测，总会找到一个可用的位置。</p>
+</blockquote>
+<p>开放定址法好处是不使用链表，所有的元素都放在一个表中，所以才有可能达到<code>O(1)</code>的搜索时间复杂度。其副作用是需要比实际用到的更大的存储空间：</p>
+<blockquote>
+<p>一般说来，对开放定址散列算法来说，装填因子应该低于<code>λ = 0.5</code>。(《数据结构与算法分析：<code>C</code>语言描述》, 2nd ed, P117)</p>
+</blockquote>
+<h2 id="Python使用开放定址法的注意事项"><a href="#Python使用开放定址法的注意事项" class="headerlink" title="Python使用开放定址法的注意事项"></a>Python使用开放定址法的注意事项</h2><p>在<code>Python</code>的<code>dict</code>中使用散列函数还需要注意一点，就是<code>dict</code>中的删除操作。</p>
+<blockquote>
+<p>通过多次使用探测函数<code>f</code>，从一个位置出发就可依次到达多个位置，我们认为这些位置形成了一个“<strong>冲突探测链</strong>”。</p>
+</blockquote>
+<p>在这条冲突探测链中间位置的元素是不能直接删除的，否则会导致其后的元素无法被索引。所以<code>Python</code>使用了一种<strong>伪删除</strong>的策略。</p>
+<p>这种策略类似于数据库中的逻辑删除，只是为数据打上已删除的标记，但并不真正的从数据库中删掉该数据。</p>
+<p>这就使得，即使元素被删除了，也依旧保留在冲突探测链上，以保证其后的元素能够被索引。其具体的实现机制将在以后的笔记中提到。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/18/《Python源码剖析》阅读笔记10/">http://nagisa.co/2017/07/18/《Python源码剖析》阅读笔记10/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/20/《Python源码剖析》阅读笔记11/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记11</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/17/《Python源码剖析》阅读笔记9/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记9</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

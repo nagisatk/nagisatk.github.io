@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记2"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/04/《Python源码剖析》阅读笔记2/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记2 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记2
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-04
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#PyLongObject"><span class="toc-text">PyLongObject</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#注释"><span class="toc-text">注释</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hack一下，测试一下"><span class="toc-text">Hack一下，测试一下</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#柔性数组-不完整类型"><span class="toc-text">柔性数组/不完整类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-text">参考</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>Python</code>中的整数类型和柔性数组。<br><a id="more"></a></p>
+<h2 id="PyLongObject"><a href="#PyLongObject" class="headerlink" title="PyLongObject"></a>PyLongObject</h2><p><strong>《Python源码剖析》</strong>的第一部分是剖析整型数据结构。按照书中的说法，整型是最简单的结构。不过<code>Python 2</code>和<code>Python 3</code>的整形结构并不一样，所以可能书中的一些说法和源码对应不上。</p>
+<p>不过这也没什么关系。</p>
+<h2 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h2><p>在<a href="http://nagisa.co/2017/06/29/《Python源码剖析》阅读笔记1/">上一篇文章</a>中，已经使用图例展示了<code>PyLongObject</code>的结构，但<code>PyLongObject</code>实际上是<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">longobject</span> <span class="title">PyLongObject</span>;</span></span><br></pre></td></tr></table></figure></p>
+<p>也就是<code>struct _longobject</code>的别名。<code>struct _longobject</code>则在<code>longintrepr.h</code>中声明：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[longintrepr.h]</span><br><span class="line"><span class="comment">/* Long integer representation.</span></span><br><span class="line"><span class="comment">   The absolute value of a number is equal to</span></span><br><span class="line"><span class="comment">   	SUM(for i=0 through abs(ob_size)-1) ob_digit[i] * 2**(SHIFT*i)</span></span><br><span class="line"><span class="comment">   Negative numbers are represented with ob_size &lt; 0;</span></span><br><span class="line"><span class="comment">   zero is represented by ob_size == 0.</span></span><br><span class="line"><span class="comment">   In a normalized number, ob_digit[abs(ob_size)-1] (the most significant</span></span><br><span class="line"><span class="comment">   digit) is never zero.  Also, in all cases, for all valid i,</span></span><br><span class="line"><span class="comment">   	0 &lt;= ob_digit[i] &lt;= MASK.</span></span><br><span class="line"><span class="comment">   The allocation function takes care of allocating extra memory</span></span><br><span class="line"><span class="comment">   so that ob_digit[0] ... ob_digit[abs(ob_size)-1] are actually available.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">   CAUTION:  Generic code manipulating subtypes of PyVarObject has to</span></span><br><span class="line"><span class="comment">   aware that ints abuse  ob_size's sign bit.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">longobject</span> &#123;</span></span><br><span class="line">	PyObject_VAR_HEAD</span><br><span class="line">	digit ob_digit[<span class="number">1</span>];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>重点看这段代码上方的注释。其中提到了：</p>
+<ol>
+<li>整型绝对值的算法：<code>SUM(for i=0 through abs(ob_size)-1) ob_digit[i] * 2**(SHIFT*i)</code>；</li>
+<li><code>ob_size</code>的符号表示整数的符号；</li>
+<li><code>0</code>由<code>ob_size == 0</code>表示；</li>
+<li>标准的（正常的）整数的<code>ob_digit[abs(ob_size)-1]</code>不为<code>0</code>；</li>
+<li>对于有效的<code>i</code>，<code>ob_digit[i]</code>的范围在<code>[0, MASK]</code>。</li>
+</ol>
+<p>其中<code>ob_size</code>是“指明的是所容纳<strong>元素的个数</strong>”。这主要是对可变对象来说的：</p>
+<blockquote>
+<p>比如对于<code>Python</code>中最常用的<code>list</code>，它就是一个<code>PyVarObject</code>对象，如果某一时刻，这个list中有<code>5</code>个元素，那么<code>ob_size</code>的值就是<code>5</code>。</p>
+</blockquote>
+<p>但<code>Python</code>中的整型是<strong>不可变对象</strong>。所以尽管使用了<code>ob_size</code>，其用途也不是当前对象中元素的个数。</p>
+<h2 id="Hack一下，测试一下"><a href="#Hack一下，测试一下" class="headerlink" title="Hack一下，测试一下"></a>Hack一下，测试一下</h2><p>从注释来看，可以认为，<code>Python 3</code>中的整型表示为<code>2**SHIFT</code>进制的整数。（参考[1]）<code>ob_size</code>的绝对值则充当了<code>2**SHIFT</code>进制位的索引数，各位上的数字则存放在<code>ob_digit</code>数组中。</p>
+<p>同样参考[1]，对<code>Python 3</code>的源码Hack一下（位置略有区别）：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">[longobject.c]</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">long_to_decimal_string_internal(PyObject *aa,</span><br><span class="line">                                PyObject **p_output,</span><br><span class="line">                                _PyUnicodeWriter *writer)</span><br><span class="line">&#123;</span><br><span class="line">    PyLongObject *scratch, *a;</span><br><span class="line">    PyObject *str;</span><br><span class="line">    Py_ssize_t size, <span class="built_in">strlen</span>, size_a, i, j;</span><br><span class="line">    digit *pout, *pin, rem, tenpow;</span><br><span class="line">    <span class="keyword">int</span> negative;</span><br><span class="line">    <span class="keyword">enum</span> PyUnicode_Kind kind;</span><br><span class="line"></span><br><span class="line">    a = (PyLongObject *)aa;</span><br><span class="line">    <span class="keyword">if</span> (a == <span class="literal">NULL</span> || !PyLong_Check(a)) &#123;</span><br><span class="line">        PyErr_BadInternalCall();</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Hack code start</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"==== Hack Code ====\n"</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"ob_size     = %d\n"</span>, Py_SIZE(a));</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> ob_i = <span class="number">0</span>; ob_i &lt; Py_SIZE(a); ++ob_i) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"ob_digit[%d] = %d\n"</span>, ob_i, a-&gt;ob_digit[ob_i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"==== Hack Code ====\n"</span>);</span><br><span class="line">    <span class="comment">// Hack code over</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// ... ...</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>顺便解释注释中的<code>SHIFT</code>，它对应<code>PyLong_SHIFT</code>宏，这个宏的实现和编译器相关，如果定义了<code>MS_WIN64</code>，那么<code>PyLong_SHIFT</code>的值就是<code>30</code>，如果定义了<code>MS_WIN32</code>，那么<code>PyLong_SHIFT</code>的值就是<code>15</code>。</p>
+<p>我的是<code>15</code>，所以在这个环境中编译的<code>Python 3</code>所使用的“进制”就是<code>2 ** 15</code>。</p>
+<p>这个可以从下面的测试看出来：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Python <span class="number">3.6</span><span class="number">.1</span> (default, Jun <span class="number">21</span> <span class="number">2017</span>, <span class="number">21</span>:<span class="number">58</span>:<span class="number">49</span>) [MSC v<span class="number">.1900</span> <span class="number">32</span> bit (Intel)] on win32</span><br><span class="line">Type <span class="string">"help"</span>, <span class="string">"copyright"</span>, <span class="string">"credits"</span> <span class="keyword">or</span> <span class="string">"license"</span> <span class="keyword">for</span> more information.</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="number">5</span> * <span class="number">2</span> ** (<span class="number">15</span> * <span class="number">3</span>) + <span class="number">4</span> * <span class="number">2</span> ** (<span class="number">15</span> * <span class="number">2</span>) + <span class="number">3</span> * <span class="number">2</span> ** (<span class="number">15</span> * <span class="number">1</span>) + <span class="number">2</span> * <span class="number">2</span> ** (<span class="number">15</span> * <span class="number">0</span>)</span><br><span class="line">==== Hack Code ====</span><br><span class="line">ob_size     = <span class="number">4</span></span><br><span class="line">ob_digit[<span class="number">0</span>] = <span class="number">2</span></span><br><span class="line">ob_digit[<span class="number">1</span>] = <span class="number">3</span></span><br><span class="line">ob_digit[<span class="number">2</span>] = <span class="number">4</span></span><br><span class="line">ob_digit[<span class="number">3</span>] = <span class="number">5</span></span><br><span class="line">==== Hack Code ====</span><br><span class="line"><span class="number">175926155509762</span></span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="柔性数组-不完整类型"><a href="#柔性数组-不完整类型" class="headerlink" title="柔性数组/不完整类型"></a>柔性数组/不完整类型</h2><p>最后要说一下在<code>struct _longobject</code>中的最后一个声明：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">digit ob_digit[<span class="number">1</span>];</span><br></pre></td></tr></table></figure></p>
+<p>一个只有一个元素的数组。</p>
+<p>这是柔性数组，出现是由于有时候需要在结构体中存放动态长度的元素，例如一个字符串。</p>
+<p>在<code>C99</code>标准中，结构体的最后一个元素允许是未知大小的数组，这被称为<strong>不完整类型</strong>。<code>struct _longobject</code>将数组的长度声明为<code>1</code>可能是出于整数类型中必然至少会有一个元素的考虑（猜的）。</p>
+<p>不管原因如何，<code>PyLong_Object</code>都是使用柔性数组实现的，从上面的测试也可以看出这一点：虽然<code>ob_digit</code>的长度为<code>1</code>，但可以访问下标大于<code>0</code>的数组元素。</p>
+<p>更多关于柔性数组的信息可以参考[2]。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><hr>
+<p>[1] <a href="http://yikun.github.io/2015/12/21/Python3%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-%E6%95%B4%E5%9E%8B/" target="_blank" rel="noopener">Python3源码学习-整型</a></p>
+<p>[2] <a href="http://blog.csdn.net/ce123_zhouwei/article/details/8973073" target="_blank" rel="noopener">深入浅出C语言中的柔性数组</a></p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/04/《Python源码剖析》阅读笔记2/">http://nagisa.co/2017/07/04/《Python源码剖析》阅读笔记2/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/05/《Python源码剖析》阅读笔记3/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记3</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/29/《Python源码剖析》阅读笔记1/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记1</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="JavaScript的粒子效果库: particles.js"/>
+
+
+
+
+  <meta name="keywords" content="Record, Open Source, JavaScript, Note, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/08/JavaScript的粒子效果库-particles-js/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> JavaScript的粒子效果库: particles.js - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          JavaScript的粒子效果库: particles.js
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-08
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本信息"><span class="toc-text">基本信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用方式"><span class="toc-text">使用方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他"><span class="toc-text">其他</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#协议"><span class="toc-text">协议</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h2 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h2><p><code>particles.js</code>是基于<code>HTML5</code>的<code>canvas</code>标签创建粒子效果的轻量级<code>JavaScript</code>库，作者是<strong>VincentGarreau</strong>，他的Github主页是: <a href="https://github.com/VincentGarreau" target="_blank" rel="noopener">https://github.com/VincentGarreau</a>，<code>particles.js</code>的项目主页是：<a href="https://github.com/VincentGarreau/particles.js/" target="_blank" rel="noopener">https://github.com/VincentGarreau/particles.js/</a>。<br><a id="more"></a><br><img src="https://camo.githubusercontent.com/cdc9e740f0c04b77449e476c91e6f7770a6af6e7/687474703a2f2f76696e63656e74676172726561752e636f6d2f7061727469636c65732e6a732f6173736574732f696d672f6769746875622d73637265656e2e6a7067" alt="Demo/generater"></p>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><p><code>particles.js</code>的引用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script src=&apos;https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js&apos;&gt;&lt;script&gt;</span><br></pre></td></tr></table></figure></p>
+<p>默认的效果代码：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Particles Demo<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">style</span> <span class="attr">type</span>=<span class="string">"text/css"</span> <span class="attr">media</span>=<span class="string">"screen"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">        * &#123;</span></span><br><span class="line"><span class="undefined">            margin: 0;</span></span><br><span class="line"><span class="undefined">            padding: 0;</span></span><br><span class="line"><span class="undefined">        &#125;</span></span><br><span class="line"><span class="undefined">        canvas &#123;</span></span><br><span class="line"><span class="undefined">            display: block;</span></span><br><span class="line"><span class="undefined">        &#125;</span></span><br><span class="line"><span class="undefined">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">'particles-js'</span> <span class="attr">style</span>=<span class="string">'background-color: blue;'</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">        particlesJS()</span></span><br><span class="line"><span class="undefined">    </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><style type="text/css" media="screen"><br>        canvas {<br>            display: block;<br>        }<br></style></p>
+<p><div id="particles-js" style="background-color: blue;"></div></p>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    particlesJS()
+</script>
+
+
+<p>初始化方法<code>particlesJS()</code>的原型如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.particlesJS = <span class="function"><span class="keyword">function</span>(<span class="params">tag_id, params</span>)</span>&#123;...&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个方法接受一个<code>HTML</code>元素的<code>id</code>和一个<code>JSON</code>格式的参数，前者是用来生成粒子效果的容器，后者则作为生成的粒子效果的属性。</p>
+<p>但这两个参数都可以<strong>省略</strong>。</p>
+<p>如果没有<code>tag_id</code>，会使用默认的<code>id</code>，也就是<code>particles-js</code>；如果没有<code>params</code>，也会有默认的设置效果，如果有<code>params</code>，传入的参数则会重写(overwrite)默认效果。</p>
+<p>在项目的<a href="https://github.com/VincentGarreau/particles.js/" target="_blank" rel="noopener"><code>Github</code>主页</a>上，作者提供了大部分参数的可选值，根据单词的意思可以知道其作用。</p>
+<p>这里列举一部分可选参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>可选值</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>particles.number.value</code></td>
+<td><code>number</code></td>
+<td>调整粒子的数量</td>
+</tr>
+<tr>
+<td><code>particles.color.value</code></td>
+<td><code>color</code></td>
+<td>调整粒子的颜色，可以接受多种形式的颜色参数，包括字符串形式的<code>random</code>，或者一个数组</td>
+</tr>
+<tr>
+<td><code>particles.shape.type</code></td>
+<td><code>&quot;circle&quot;, &quot;edge&quot;, &quot;triangle&quot;, &quot;polygon&quot;, &quot;star&quot;, &quot;image&quot;, [&quot;circle&quot;, &quot;triangle&quot;, &quot;image&quot;]</code></td>
+<td>调整粒子的形状，同样可以接受数组</td>
+</tr>
+<tr>
+<td><code>particles.shape.polygon.nb_slides</code></td>
+<td><code>number</code></td>
+<td>若形状参数中含有<code>polygon</code>，这个参数可以调整多边形的边数</td>
+</tr>
+<tr>
+<td><code>particles.line_linked.enable</code></td>
+<td><code>true</code>/<code>flase</code></td>
+<td>粒子之间是否连线</td>
+</tr>
+<tr>
+<td><code>particles.line_linked.color</code></td>
+<td><code>HEX (string)</code></td>
+<td>上述连线的颜色，似乎只接受<code>#ffffff</code>形式的参数</td>
+</tr>
+<tr>
+<td><code>particles.move.direction</code></td>
+<td><code>&quot;none&quot;, &quot;top&quot;, &quot;top-right&quot;, &quot;right&quot;, &quot;bottom-right&quot;, &quot;bottom&quot;, &quot;bottom-left&quot;, &quot;left&quot;, &quot;top-left&quot;</code></td>
+<td>粒子移动的方向，默认为<code>none</code>，无规则移动</td>
+</tr>
+<tr>
+<td><code>interactivity.events.onhover.mode</code></td>
+<td><code>&quot;grab&quot;, &quot;bubble&quot;, &quot;repulse&quot;, [&quot;grab&quot;, &quot;bubble&quot;]</code></td>
+<td>鼠标悬浮事件属性</td>
+</tr>
+<tr>
+<td><code>interactivity.events.onclick.mode</code></td>
+<td><code>&quot;push&quot;, &quot;remove&quot;, &quot;bubble&quot;, &quot;repulse&quot;, [&quot;push&quot;, &quot;repulse&quot;]</code></td>
+<td>鼠标单击事件属性</td>
+</tr>
+<tr>
+<td><code>interactivity.events.modes.bubble.size</code></td>
+<td><code>number</code></td>
+<td>若选定<code>bubble</code>事件，此属性可设定气泡大小</td>
+</tr>
+</tbody>
+</table>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>在作者的个人网站上，有一个<a href="vincentgarreau.com/particles.js/">粒子效果的展示页面</a>（需翻墙），上面有几个作者设置的不同效果，并且提供了参数导出。</p>
+<h2 id="协议"><a href="#协议" class="headerlink" title="协议"></a>协议</h2><p>作者设置了<a href="https://github.com/VincentGarreau/particles.js/blob/master/LICENSE.md" target="_blank" rel="noopener"><strong>MIT协议</strong></a>，本文也遵循该协议。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/08/JavaScript的粒子效果库-particles-js/">http://nagisa.co/2017/06/08/JavaScript的粒子效果库-particles-js/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Record/">Record</a>
+            
+              <a href="/tags/Open-Source/">Open Source</a>
+            
+              <a href="/tags/JavaScript/">JavaScript</a>
+            
+              <a href="/tags/Note/">Note</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/12/遗传算法的一个例子（使用TypeScript-JavaScript）/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">遗传算法的一个例子（使用TypeScript/JavaScript）</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/02/Static-blog-on-Github-Pages-using-Hexo/">
+        <span class="next-text nav-default">Static blog on Github Pages using Hexo</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

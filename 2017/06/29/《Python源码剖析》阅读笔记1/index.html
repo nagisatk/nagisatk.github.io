@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记1"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/29/《Python源码剖析》阅读笔记1/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记1 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记1
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-29
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-3-or-Python-2"><span class="toc-text">Python 3 or Python 2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析源码时的注意点"><span class="toc-text">分析源码时的注意点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PyLongObject和PyIntObject"><span class="toc-text">PyLongObject和PyIntObject</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>《Python源码剖析》阅读笔记第一篇。<br><a id="more"></a></p>
+<h2 id="Python-3-or-Python-2"><a href="#Python-3-or-Python-2" class="headerlink" title="Python 3 or Python 2"></a>Python 3 or Python 2</h2><p>虽然最初我学习<code>Python</code>的时候，学习的是<code>Python 2</code>，买的教材也是针对<code>Python 2</code>的。不过现在已经几乎不使用<code>Python 2</code>了，而是完全使用<code>Python 3</code>。原因非常简单，我只是单纯地相信<code>Python 3</code>比<code>Python 2</code>更完备一些。这种完备并非指的是生态环境，而是基于进步主义自然而然地生发出来的观点，<code>Python</code>的作者没有必要开发一种新的但是毫无优势的<strong>新语言</strong>。</p>
+<p>所以看《<code>Python</code><strong>源码剖析</strong>》这本书的时候，我也是对照着<code>Python 3</code>的源码在看。源码上的区别当然存在，所以看起来略有些费劲，但正因如此，我才要写一些笔记，以备不时之需。</p>
+<p>当然，写这些笔记也是为了让自己能够坚持读下去。</p>
+<h2 id="分析源码时的注意点"><a href="#分析源码时的注意点" class="headerlink" title="分析源码时的注意点"></a>分析源码时的注意点</h2><p>在进入<code>Python</code>的模型剖析之前，书中显示展示了一下代码结构，例如指出了几个可能会在调试阶段用到的函数，其中最重要的（我认为）是输出函数。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[object.h]</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">PyObject_Print</span><span class="params">(PyObject *, FILE *, <span class="keyword">int</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">[intobject.c]</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">int_print</span><span class="params">(PyIntObject *v, FILE *fp, <span class="keyword">int</span> flags)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>但是，略不幸的是，尽管<code>object.h</code>中确实存在一个<code>PyObject_Print()</code>的函数，但是在<code>longobject.h</code>中，并不存在一个<code>long_print()</code>函数。</p>
+<p>这也显示出Python 2和Python 3的另一个区别，Python 3中的整数类型并不是如书中所说的对<code>long</code>类型的简单包装，而是一种更为复杂的实现。</p>
+<p>我查询了<code>Python2.7.11</code>的源码，<code>int_print()</code>函数依旧保留着。这也是<code>Python 3</code>和<code>Python 2</code>在实现上的另一点区别。而在<code>Python 3.6</code>的源码中，注释为<code>/* tp_print */</code>的函数则是<code>0</code>，也就是个<strong>空指针</strong>。</p>
+<p>不过由于同时查阅两种版本的代码不太方便，所以以后可能会非常偶尔地才去查阅<code>Python 2.7.11</code>的代码。<code>Python 2.x</code>版本的代码结构以书上（该书使用的是<code>2.5</code>）为准，我会尽量地罗列出<code>3.6</code>版和书中的不同，并以<code>3.6</code>为主。</p>
+<h2 id="PyLongObject和PyIntObject"><a href="#PyLongObject和PyIntObject" class="headerlink" title="PyLongObject和PyIntObject"></a>PyLongObject和PyIntObject</h2><p>如上所说，<code>Python 3</code>中没有了<code>PyIntObject</code>，取而代之的是<code>PyLongObject</code>。</p>
+<p>这两者之间也是有些区别的。</p>
+<p>下面这张图显示了<code>Python 3</code>中的<code>PyLongObject</code>的结构：</p>
+<p><img src="https://github.com/nagisatk/nagisatk.github.io/blob/master/2017/06/29/%E3%80%8APython%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90%E3%80%8B%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B01/PyLongObject.png?raw=true" alt="PyLongObject"></p>
+<blockquote>
+<p><code>PyObject_VAR_HEAD</code>PyObject_VAR_HEAD defines the initial segment of all variable-size container objects.</p>
+</blockquote>
+<p>这是源码中的注释，但需要注意的是，<strong>整数类型</strong>在Python 3中是<strong>不可变对象</strong>。</p>
+<p>如果一个整数对象<code>x</code>重新赋值或者进行了加减运算，在操作前后<code>id(x)</code>的值是不同的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Python <span class="number">3.6</span><span class="number">.1</span> (v3<span class="number">.6</span><span class="number">.1</span>:<span class="number">69</span>c0db5, Mar <span class="number">21</span> <span class="number">2017</span>, <span class="number">17</span>:<span class="number">54</span>:<span class="number">52</span>) [MSC v<span class="number">.1900</span> <span class="number">32</span> bit (Intel)] on win32</span><br><span class="line">Type <span class="string">"help"</span>, <span class="string">"copyright"</span>, <span class="string">"credits"</span> <span class="keyword">or</span> <span class="string">"license"</span> <span class="keyword">for</span> more information.</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = <span class="number">5000</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>id(x)</span><br><span class="line"><span class="number">51592560</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>x = x + <span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>id(x)</span><br><span class="line"><span class="number">53048288</span></span><br></pre></td></tr></table></figure>
+<p>在Python的源码中肯定能够找到解释，但目前我还没有发现。</p>
+<p><code>PyObject</code>结构体是<code>Python</code>类型的基础，所有指向一个<code>Python</code>对象的指针都能被转换成一个指向<code>PyObject</code>的指针。</p>
+<p>另外，<code>_PyObject_HEAD_EXTRA</code>宏是在定义了<code>Py_TRACE_REFS</code>宏之后才会有定义的，而在实际发布的Python中，<code>_PyObject_HEAD_EXTRA</code>宏是未定义的，所以<code>Py_TRACE_REFS</code>也就是空的。那么，实际的<code>PyObject</code>结构体只有一个用于引用计数的<code>Py_ssize_t ob_refcnt;</code>和一个存放类型信息的指针：<code>struct _typeobject *ob_type;</code></p>
+<p>所以Python源码的剖析就从<code>PyLongObject</code>开始吧。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/29/《Python源码剖析》阅读笔记1/">http://nagisa.co/2017/06/29/《Python源码剖析》阅读笔记1/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/04/《Python源码剖析》阅读笔记2/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记2</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/18/常用排序算法笔记-5-快速排序-Quick-Sort/">
+        <span class="next-text nav-default">常用排序算法笔记(5) - 快速排序(Quick Sort)</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

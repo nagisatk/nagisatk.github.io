@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="常用排序算法笔记(1) - 插入排序(Insert Sort)"/>
+
+
+
+
+  <meta name="keywords" content="Note, Sort Algorithm, Insert Sort, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/14/常用排序算法笔记(1)-插入排序(Insert-Sort)/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 常用排序算法笔记(1) - 插入排序(Insert Sort) - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          常用排序算法笔记(1) - 插入排序(Insert Sort)
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-14
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#几句废话"><span class="toc-text">几句废话</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#插入排序"><span class="toc-text">插入排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码实现"><span class="toc-text">代码实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试"><span class="toc-text">测试</span></a>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>本文介绍了排序算法中的插入排序。<br><a id="more"></a></p>
+<h4 id="几句废话"><a href="#几句废话" class="headerlink" title="几句废话"></a>几句废话</h4><p>最近在看《数据结构与算法分析：C语言描述》<code>(DSAA)</code>，算是补补课。看到了排序一章，准备记录一下书上提到的几个排序算法。</p>
+<p>大多数排序算法以前都实现过了，但代码基本上都已经找不到了。</p>
+<h2 id="插入排序"><a href="#插入排序" class="headerlink" title="插入排序"></a>插入排序</h2><blockquote>
+<p>插入排序由<code>N-1</code>趟<code>(pass)</code>排序组成。对于<code>P=1</code>趟到<code>P=N-1</code>趟，插入排序保证从位置<code>0</code>到位置<code>P</code>上的元素为已排序状态。插入排序利用了这样的事实：位置<code>0</code>到位置<code>P-1</code>上的元素是已排过序的。 —— <em><code>DSAA P165</code></em></p>
+</blockquote>
+<p>书上的描述已经很清晰了，如果再说得直白一些，就是说排序<code>N</code>个元素需要遍历整个数组<code>N-1</code>次，第<code>k</code>次遍历前<code>k+1</code>个元素。每次遍历时，将数组中第<code>k+1</code>个元素插入到它在前<code>k+1</code>个元素中正确的位置。</p>
+<p>书中给出了一个<code>6</code>元素的数组进行插入排序的例子：</p>
+<table>
+<thead>
+<tr>
+<th>初始</th>
+<th><code>34  8   64  51  32  21</code></th>
+<th>移动的位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>P=1</code></td>
+<td><code>8    34   64  51  32  21</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>P=2</code></td>
+<td><code>8    34   64  51  32  21</code></td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>P=3</code></td>
+<td><code>8    34   51 64  32  21</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>P=4</code></td>
+<td><code>8  32    34   51 64  21</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>P=5</code></td>
+<td><code>8  21  32    34   51 64</code></td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>插入排序的实现非常简单：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">InserSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, j;</span><br><span class="line">    <span class="keyword">int</span> tmp;</span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">        tmp = eles[i];</span><br><span class="line">        <span class="keyword">for</span>(j = i; j &gt; <span class="number">0</span> &amp;&amp; eles[j - <span class="number">1</span>] &gt; tmp; j--)</span><br><span class="line">            eles[j] = eles[j - <span class="number">1</span>];</span><br><span class="line">        eles[j] = tmp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>因为以后也会用到，所以写了个测试的方法：</p>
+<p>设定一个最大的随机数生成数量（本例中是<code>100000</code>）。然后从这个最大数量的<code>1/10</code>开始，每次生成这么多的随机数进行排序，记录一条结果，包括最小值(<code>MinValue</code>)、最大值(<code>MaxValue</code>)、随机数数量(<code>Numbers</code>)和排序的时间(<code>Used Time</code>)，重复<code>3</code>次，然后随机数生成数量递增最大值的<code>1/10</code>。一共生成<code>30</code>条记录。</p>
+<p>其中一次的记录如下：</p>
+<table>
+<thead>
+<tr>
+<th>MinValue</th>
+<th>MaxValue</th>
+<th>Numbers</th>
+<th>Used Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>         1</td>
+<td>32764</td>
+<td>10000</td>
+<td>95</td>
+</tr>
+<tr>
+<td>         1</td>
+<td>32764</td>
+<td>10000</td>
+<td>96</td>
+</tr>
+<tr>
+<td>         1</td>
+<td>32764</td>
+<td>10000</td>
+<td>96</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32766</td>
+<td>20000</td>
+<td>405</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32765</td>
+<td>20000</td>
+<td>452</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32765</td>
+<td>20000</td>
+<td>399</td>
+</tr>
+<tr>
+<td>         1</td>
+<td>32767</td>
+<td>30000</td>
+<td>898</td>
+</tr>
+<tr>
+<td>         5</td>
+<td>32767</td>
+<td>30000</td>
+<td>892</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32766</td>
+<td>30000</td>
+<td>884</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32766</td>
+<td>40000</td>
+<td>1603</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>40000</td>
+<td>1574</td>
+</tr>
+<tr>
+<td>         1</td>
+<td>32765</td>
+<td>40000</td>
+<td>1569</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>50000</td>
+<td>2501</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>50000</td>
+<td>2528</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>50000</td>
+<td>2544</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>60000</td>
+<td>3950</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>60000</td>
+<td>3745</td>
+</tr>
+<tr>
+<td>         1</td>
+<td>32767</td>
+<td>60000</td>
+<td>3946</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>70000</td>
+<td>5400</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>70000</td>
+<td>5367</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>70000</td>
+<td>5209</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>80000</td>
+<td>6612</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>80000</td>
+<td>6573</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>80000</td>
+<td>6609</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>90000</td>
+<td>8703</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>90000</td>
+<td>8359</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>90000</td>
+<td>8559</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>9841</td>
+</tr>
+<tr>
+<td>         1</td>
+<td>32767</td>
+<td>100000</td>
+<td>10039</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>10110</td>
+</tr>
+</tbody>
+</table>
+<p>当然，只是表格的话看起来并不是非常清晰，所以进行了一点可视化的操作，将上述表格中的时间画成了如下的散点图（其中横坐标是随机数的数量，纵坐标是排序时间）：</p>
+<p><canvas style="margin:0px 20%;width: 60%; background-color: gray;" id="blue"></canvas></p>
+<script type="text/javascript">
+        var data = [95, 96, 96, 405, 452, 399, 898, 892, 884, 1603, 1574, 1569, 2501, 2528, 2544, 3950, 3745, 3946, 5400, 5367, 5209, 6612, 6573, 6609, 8703, 8359, 8559, 9841, 10039, 10110]
+        var canvas = document.getElementById('blue')
+        var ctx = canvas.getContext("2d")
+        canvas.width = canvas.offsetWidth
+        canvas.height = canvas.offsetHeight
+
+        var widht = canvas.offsetWidth
+        var height = canvas.offsetHeight
+        var delta = canvas.offsetWidth / 12
+        var x = 0
+        var max = 0
+        for(var k = 1; k < 4; k++) {
+            if(data[data.length - k] > max)
+                max = data[data.length - k]
+        }
+        ctx.fillStyle = 'black'
+        for(var i = 0; i < 30; i += 3) {
+            x += delta
+            for(var j = 0; j < 3; j ++) {
+                var y = Math.floor(data[i+j]/max * height * 0.9)
+                ctx.beginPath()
+                ctx.arc(Math.floor(x), height - y, 3, 0, 2*Math.PI, true)
+                ctx.fill()
+            }
+        }
+</script>
+
+<p>受到网页的限制，横纵坐标的比例有点失衡，但依旧可以看出曲线的斜率越来越高。如果看数值的话，可以看到当随机数的数量提高到最初的<code>10</code>时，排序所需的时间大致提高了<code>100</code>倍，符合插入排序的<code>O(n</code><sup><code>2</code></sup><code>)</code>的平均时间复杂度。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/14/常用排序算法笔记(1)-插入排序(Insert-Sort)/">http://nagisa.co/2017/06/14/常用排序算法笔记(1)-插入排序(Insert-Sort)/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Note/">Note</a>
+            
+              <a href="/tags/Sort-Algorithm/">Sort Algorithm</a>
+            
+              <a href="/tags/Insert-Sort/">Insert Sort</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/16/常用排序算法笔记-2-希尔排序-Shell-Sort/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">常用排序算法笔记(2) - 希尔排序(Shell Sort)</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/12/遗传算法的一个例子（使用TypeScript-JavaScript）/">
+        <span class="next-text nav-default">遗传算法的一个例子（使用TypeScript/JavaScript）</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

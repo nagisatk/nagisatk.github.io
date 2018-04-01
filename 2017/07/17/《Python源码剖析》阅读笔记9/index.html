@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记9"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/17/《Python源码剖析》阅读笔记9/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记9 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记9
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-17
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#list删除元素"><span class="toc-text">list删除元素</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PyListObject-对象缓冲池"><span class="toc-text">PyListObject 对象缓冲池</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他"><span class="toc-text">其他</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>list</code>对象删除元素和<code>list</code>对象缓冲池。<br><a id="more"></a></p>
+<h2 id="list删除元素"><a href="#list删除元素" class="headerlink" title="list删除元素"></a>list删除元素</h2><p>删除元素也是一个容器常用的操作，在<code>Python</code>中，这个操作用<code>list.remove(item)</code>完成。</p>
+<p>下面是<code>Python 3</code>的实现中关于删除操作的代码：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> PyObject *</span><br><span class="line">listremove(PyListObject *self, PyObject *v)</span><br><span class="line">&#123;</span><br><span class="line">    Py_ssize_t i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; Py_SIZE(self); i++) &#123;</span><br><span class="line">        <span class="keyword">int</span> cmp = PyObject_RichCompareBool(self-&gt;ob_item[i], v, Py_EQ);</span><br><span class="line">        <span class="keyword">if</span> (cmp &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (list_ass_slice(self, i, i+<span class="number">1</span>,</span><br><span class="line">                               (PyObject *)<span class="literal">NULL</span>) == <span class="number">0</span>)</span><br><span class="line">                Py_RETURN_NONE;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (cmp &lt; <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    PyErr_SetString(PyExc_ValueError, <span class="string">"list.remove(x): x not in list"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>删除的逻辑非常简单，遍历整个列表，如果在列表中发现了要删除的元素就删掉它，否则返回<code>ValueError: list.remove(x): x not in list</code>。</p>
+<p>删掉元素的操作是由函数<code>list_ass_slice</code>完成的。</p>
+<p>但这个函数并不是仅仅用来删除元素，根据书中和代码中的注释：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* a[ilow:ihigh] = v if v != NULL.</span></span><br><span class="line"><span class="comment"> * del a[ilow:ihigh] if v == NULL.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Special speed gimmick:  when v is NULL and ihigh - ilow &lt;= 8, it's</span></span><br><span class="line"><span class="comment"> * guaranteed the call cannot fail.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">list_ass_slice(PyListObject *a, Py_ssize_t ilow, Py_ssize_t ihigh, PyObject *v)</span><br></pre></td></tr></table></figure></p>
+<p>当第三个参数<code>v == NULL</code>的时候，这个函数将进行删除(<code>remvoe</code>)操作，而<code>v != NULL</code>时，这个函数就会进行替换(<code>replace</code>)操作。</p>
+<p>下面摘录了<code>list_ass_slice</code>函数的一部分代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">list_ass_slice(PyListObject *a, Py_ssize_t ilow, Py_ssize_t ihigh, PyObject *v)</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    Py_ssize_t n; <span class="comment">/* # of elements in replacement list */</span></span><br><span class="line">    Py_ssize_t norig; <span class="comment">/* # of elements in list getting replaced */</span></span><br><span class="line">    Py_ssize_t d; <span class="comment">/* Change in size */</span></span><br><span class="line">    Py_ssize_t k;</span><br><span class="line">    ...</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> b ((PyListObject *)v)</span></span><br><span class="line">    <span class="comment">// [1]</span></span><br><span class="line">    <span class="keyword">if</span> (v == <span class="literal">NULL</span>)</span><br><span class="line">        n = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        n = PySequence_Fast_GET_SIZE(v_as_SF);</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// [2]</span></span><br><span class="line">    norig = ihigh - ilow;</span><br><span class="line">    assert(norig &gt;= <span class="number">0</span>);</span><br><span class="line">    d = n - norig;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// [3]</span></span><br><span class="line">    <span class="keyword">if</span> (d &lt; <span class="number">0</span>) &#123; <span class="comment">/* Delete -d items */</span></span><br><span class="line">        Py_ssize_t tail;</span><br><span class="line">        tail = (Py_SIZE(a) - ihigh) * <span class="keyword">sizeof</span>(PyObject *);</span><br><span class="line">        memmove(&amp;item[ihigh+d], &amp;item[ihigh], tail);</span><br><span class="line">        <span class="keyword">if</span> (list_resize(a, Py_SIZE(a) + d) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            memmove(&amp;item[ihigh], &amp;item[ihigh+d], tail);</span><br><span class="line">            <span class="built_in">memcpy</span>(&amp;item[ilow], recycle, s);</span><br><span class="line">            <span class="keyword">goto</span> Error;</span><br><span class="line">        &#125;</span><br><span class="line">        item = a-&gt;ob_item;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (d &gt; <span class="number">0</span>) &#123; <span class="comment">/* Insert d items */</span></span><br><span class="line">        k = Py_SIZE(a);</span><br><span class="line">        <span class="keyword">if</span> (list_resize(a, k+d) &lt; <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">goto</span> Error;</span><br><span class="line">        item = a-&gt;ob_item;</span><br><span class="line">        memmove(&amp;item[ihigh+d], &amp;item[ihigh],</span><br><span class="line">            (k - ihigh)*<span class="keyword">sizeof</span>(PyObject *));</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line"><span class="meta">#<span class="meta-keyword">undef</span> b</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>按照在<code>listremove</code>中的调用形式：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">list_ass_slice(self, i, i+<span class="number">1</span>, (PyObject *)<span class="literal">NULL</span>)</span><br></pre></td></tr></table></figure></p>
+<p>可以得到，在<code>[1]</code>处<code>n</code>被赋值为<code>0</code>，于是<code>d</code>则是<code>-1</code>(<code>[2]</code>)，在<code>[3]</code>处进入<code>if</code>语句的第一个分支，执行删除操作。</p>
+<p>如果<code>v != NULL</code>，最后则会进入<code>if</code>第二个分支，于是执行替换操作。</p>
+<h2 id="PyListObject-对象缓冲池"><a href="#PyListObject-对象缓冲池" class="headerlink" title="PyListObject 对象缓冲池"></a>PyListObject 对象缓冲池</h2><p>在(上一篇笔记)[]中提到的<code>PyListObject</code>缓冲池，也就是<code>free_lists</code>数组，是实现<code>list</code>对象缓冲机制的关键。</p>
+<p>数组中的元素是在一个<code>list</code>对象被销毁的时候加入到这个数组中去的：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">list_dealloc(PyListObject *op)</span><br><span class="line">&#123;</span><br><span class="line">    Py_ssize_t i;</span><br><span class="line">    PyObject_GC_UnTrack(op);</span><br><span class="line">    Py_TRASHCAN_SAFE_BEGIN(op)</span><br><span class="line">    <span class="keyword">if</span> (op-&gt;ob_item != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="comment">/* Do it backwards, for Christian Tismer.</span></span><br><span class="line"><span class="comment">           There's a simple test case where somehow this reduces</span></span><br><span class="line"><span class="comment">           thrashing when a *very* large list is created and</span></span><br><span class="line"><span class="comment">           immediately deleted. */</span></span><br><span class="line">        i = Py_SIZE(op);</span><br><span class="line">        <span class="keyword">while</span> (--i &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            Py_XDECREF(op-&gt;ob_item[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        PyMem_FREE(op-&gt;ob_item);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (numfree &lt; PyList_MAXFREELIST &amp;&amp; PyList_CheckExact(op))</span><br><span class="line">        free_list[numfree++] = op;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        Py_TYPE(op)-&gt;tp_free((PyObject *)op);</span><br><span class="line">    Py_TRASHCAN_SAFE_END(op)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>一个<code>list</code>被销毁之前会检查<code>free_list</code>数组是不是已经满了，也就是<code>numfree &lt; PyList_MAXFREELIST</code>这个布尔表达式，前者是当前指向的空位置，这个位置不能超过<code>PyList_MAXFREELIST</code>的范围，后者的默认大小是<code>80</code>。</p>
+<p>如果<code>free_list</code>中还有空位置，就会将这个已经不包含任何元素的<code>list</code>加入到数组中，以备之后使用。当然，这个<code>list</code>对象中原本包含的元素已经被经过了恰当的处理：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (--i &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">    Py_XDECREF(op-&gt;ob_item[i]);</span><br><span class="line">&#125;</span><br><span class="line">PyMem_FREE(op-&gt;ob_item);</span><br></pre></td></tr></table></figure></p>
+<p>所有的元素都会减少引用计数，并将<code>op-&gt;ob_item</code>指针释放掉。</p>
+<p>这个代码的实现虽然很简单，但这个想法十分精巧。既不会增大太多的内存消耗，也有利于减少申请/施放内存的操作，还有效利用了已经申请的内存。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>在<code>4.4 Hack PyListObject</code>中，作者依旧使用了一个在<code>Python 3</code>中并不存在的函数<code>list_print</code>。</p>
+<p>所以<code>hack</code>操作也就不做了。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/17/《Python源码剖析》阅读笔记9/">http://nagisa.co/2017/07/17/《Python源码剖析》阅读笔记9/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/18/《Python源码剖析》阅读笔记10/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记10</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/15/《Python源码剖析》阅读笔记8/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记8</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

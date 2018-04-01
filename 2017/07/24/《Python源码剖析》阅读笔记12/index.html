@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记12"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/24/《Python源码剖析》阅读笔记12/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记12 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记12
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-24
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#dict缓冲池的不同策略"><span class="toc-text">dict缓冲池的不同策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dict的搜索策略"><span class="toc-text">dict的搜索策略</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>Python</code>中<code>dict</code>的实现(2)：缓冲池和搜索策略。<br><a id="more"></a></p>
+<h2 id="dict缓冲池的不同策略"><a href="#dict缓冲池的不同策略" class="headerlink" title="dict缓冲池的不同策略"></a>dict缓冲池的不同策略</h2><p><code>Python 2</code>中，由于<code>dict</code>中的元素比较少时，元素是存储在<code>dict</code>对象中的，所以只有一种对象缓冲池，就是<code>dict</code>对象的缓冲池。</p>
+<p>像<code>list</code>对象一样。最初，这个缓冲池中什么都没有，当有第一个被销毁的<code>dict</code>对象时，这个对象被放入缓冲池中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[dictobject.c]</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">dict_dealloc(<span class="keyword">register</span> PyDictObject *mp)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">register</span> PyDictEntry *ep;</span><br><span class="line">    Py_ssize_t fill = mp-&gt;ma_fill;</span><br><span class="line">    PyObject_GC_UnTrack(mp);</span><br><span class="line">    Py_TRASHCAN_SAFE_BEGIN(mp)</span><br><span class="line">    <span class="comment">// [1] 调整dict中对象的引用计数</span></span><br><span class="line">    <span class="keyword">for</span> (ep = mp-&gt;ma_table; fill &gt; <span class="number">0</span>; ep++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ep-&gt;me_key) &#123;</span><br><span class="line">            --fill;</span><br><span class="line">            Py_DECREF(ep-&gt;me_key);</span><br><span class="line">            Py_XDECREF(ep-&gt;me_value);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// [2] 释放从系统堆中申请的内存空间</span></span><br><span class="line">    <span class="keyword">if</span> (mp-&gt;ma_table != mp-&gt;ma_smalltable)</span><br><span class="line">        PyMem_DEL(mp-&gt;ma_table);</span><br><span class="line">    <span class="comment">// [3] 将被销毁的PyDictObjecth对象放入缓冲池</span></span><br><span class="line">    <span class="keyword">if</span> (numfree &lt; PyDict_MAXFREELIST &amp;&amp; Py_TYPE(mp) == &amp;PyDict_Type)</span><br><span class="line">        free_list[numfree++] = mp;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        Py_TYPE(mp)-&gt;tp_free((PyObject *)mp);</span><br><span class="line">    Py_TRASHCAN_SAFE_END(mp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>(注释引用自书中原文)</p>
+<p>但是<code>Python 3</code>中的缓冲池策略则有所区别：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[dictobject.c]</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">dict_dealloc(PyDictObject *mp)</span><br><span class="line">&#123;</span><br><span class="line">    PyObject **values = mp-&gt;ma_values;</span><br><span class="line">    PyDictKeysObject *keys = mp-&gt;ma_keys;</span><br><span class="line">    Py_ssize_t i, n;</span><br><span class="line">    PyObject_GC_UnTrack(mp);</span><br><span class="line">    Py_TRASHCAN_SAFE_BEGIN(mp)</span><br><span class="line">    <span class="keyword">if</span> (values != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (values != empty_values) &#123;</span><br><span class="line">            <span class="keyword">for</span> (i = <span class="number">0</span>, n = mp-&gt;ma_keys-&gt;dk_nentries; i &lt; n; i++) &#123;</span><br><span class="line">                Py_XDECREF(values[i]);</span><br><span class="line">            &#125;</span><br><span class="line">            free_values(values);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// [4]</span></span><br><span class="line">        DK_DECREF(keys);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (keys != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        assert(keys-&gt;dk_refcnt == <span class="number">1</span>);</span><br><span class="line">        DK_DECREF(keys);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (numfree &lt; PyDict_MAXFREELIST &amp;&amp; Py_TYPE(mp) == &amp;PyDict_Type)</span><br><span class="line">        free_list[numfree++] = mp;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        Py_TYPE(mp)-&gt;tp_free((PyObject *)mp);</span><br><span class="line">    Py_TRASHCAN_SAFE_END(mp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Python 3</code>中的<code>dict_dealloc</code>函数与<code>Python 2</code>中的最大的区别就在于<code>[4]</code>处的语句：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DK_DECREF(keys);</span><br></pre></td></tr></table></figure></p>
+<p>这是一个宏。</p>
+<p>前面已经知道，<code>Python 3</code>中<code>dict</code>中的元素都是和<code>dict</code>对象分开存储的。当<code>dict</code>比较小的时候，<code>key</code>和<code>value</code>都存储在结构体成员<code>ma_keys</code>所指向的<code>PyDictKeysObject</code>对象中。</p>
+<p>上边的宏展开之后是这样的：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DK_DECREF(dk) <span class="meta-keyword">if</span> (DK_DEBUG_DECREF (--(dk)-&gt;dk_refcnt) == 0) free_keys_object(dk)</span></span><br></pre></td></tr></table></figure></p>
+<p>它调用了<code>free_keys_object</code>函数，这个函数的作用和<code>dict_dealloc</code>差不多，用来完成缓冲池的操作，或者释放<code>keys</code>所指向的内存：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[dictobject.c]</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">free_keys_object(PyDictKeysObject *keys)</span><br><span class="line">&#123;</span><br><span class="line">    PyDictKeyEntry *entries = DK_ENTRIES(keys);</span><br><span class="line">    Py_ssize_t i, n;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>, n = keys-&gt;dk_nentries; i &lt; n; i++) &#123;</span><br><span class="line">        Py_XDECREF(entries[i].me_key);</span><br><span class="line">        Py_XDECREF(entries[i].me_value);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// [5]</span></span><br><span class="line">    <span class="keyword">if</span> (keys-&gt;dk_size == PyDict_MINSIZE &amp;&amp; numfreekeys &lt; PyDict_MAXFREELIST) &#123;</span><br><span class="line">        keys_free_list[numfreekeys++] = keys;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    PyObject_FREE(keys);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>[5]</code>处的代码和<code>dict</code>缓冲池的写法如出一辙，都是将需要被销毁的对象加入到缓冲池当中。这样，生成<code>dict</code>时，也不需要每次都为小的<code>dict</code>申请内存了。</p>
+<p>以上就是<code>Python 2</code>和<code>Python 3</code>中<code>dict</code>的缓冲池的不同。重点在于由于后者采用的分离式存储结构，多加了一个缓冲池进去。</p>
+<h2 id="dict的搜索策略"><a href="#dict的搜索策略" class="headerlink" title="dict的搜索策略"></a>dict的搜索策略</h2><blockquote>
+<p><code>Python</code>为<code>PyDictObject</code>对象提供了两种搜索策略，<code>lookdict</code>和<code>lookdict_string</code>。实际上， 这两种策略使用的是相同的算法，<code>lookdict_string</code>只是<code>lookdict</code>的一种针对<code>PyStringObject</code>对象的特殊形式。</p>
+</blockquote>
+<p>这是<code>Python 2</code>中的<code>dict</code>的搜索策略。对于<code>Python 3</code>来说，则新增了第三种搜索策略：<code>lookdict_unicode_nodummy</code>。</p>
+<p>如同函数名所表示的，这种搜索是用在当知道<code>dict</code>中没有<code>Dummy</code>元素的时候使用的。这个函数的注释是这么写的：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Faster version of lookdict_unicode when it is known that no &lt;dummy&gt; keys</span></span><br><span class="line"><span class="comment"> * will be present. */</span></span><br></pre></td></tr></table></figure></p>
+<p><code>lookdict_unicode</code>就是<code>Python 3</code>中和<code>lookdict_string</code>对应的函数了。</p>
+<p>和<code>Python 2</code>中一样，三种不同的策略使用的算法是一样的，后两者只是为了加快速度而写的快速版本。</p>
+<p>最通用的就是<code>lookdict</code>方法了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Py_ssize_t</span><br><span class="line">lookdict(PyDictObject *mp, PyObject *key,</span><br><span class="line">         Py_hash_t hash, PyObject ***value_addr, Py_ssize_t *hashpos)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">size_t</span> i, mask;</span><br><span class="line">    Py_ssize_t ix, freeslot;</span><br><span class="line">    <span class="keyword">int</span> cmp;</span><br><span class="line">    PyDictKeysObject *dk;</span><br><span class="line">    PyDictKeyEntry *ep0, *ep;</span><br><span class="line">    PyObject *startkey;</span><br><span class="line"></span><br><span class="line">top:</span><br><span class="line">    dk = mp-&gt;ma_keys;</span><br><span class="line">    mask = DK_MASK(dk);</span><br><span class="line">    ep0 = DK_ENTRIES(dk);</span><br><span class="line">    i = (<span class="keyword">size_t</span>)hash &amp; mask;</span><br><span class="line"></span><br><span class="line">    ix = dk_get_index(dk, i);</span><br><span class="line">    <span class="comment">// [1] 如果探测到的第一个slot是空的，返回</span></span><br><span class="line">    <span class="keyword">if</span> (ix == DKIX_EMPTY) &#123;</span><br><span class="line">        <span class="keyword">if</span> (hashpos != <span class="literal">NULL</span>)</span><br><span class="line">            *hashpos = i;</span><br><span class="line">        *value_addr = <span class="literal">NULL</span>;</span><br><span class="line">        <span class="keyword">return</span> DKIX_EMPTY;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// [2] 如果探测到的第一个slot是dummy的，设置freeslot</span></span><br><span class="line">    <span class="keyword">if</span> (ix == DKIX_DUMMY) &#123;</span><br><span class="line">        freeslot = i;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// [3] slot中有内容</span></span><br><span class="line">        ep = &amp;ep0[ix];</span><br><span class="line">        assert(ep-&gt;me_key != <span class="literal">NULL</span>);</span><br><span class="line">        <span class="comment">// [4] 比较两者的key</span></span><br><span class="line">        <span class="keyword">if</span> (ep-&gt;me_key == key) &#123;</span><br><span class="line">            *value_addr = &amp;ep-&gt;me_value;</span><br><span class="line">            <span class="keyword">if</span> (hashpos != <span class="literal">NULL</span>)</span><br><span class="line">                *hashpos = i;</span><br><span class="line">            <span class="keyword">return</span> ix;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// [5] 比较hash值</span></span><br><span class="line">        <span class="keyword">if</span> (ep-&gt;me_hash == hash) &#123;</span><br><span class="line">            startkey = ep-&gt;me_key;</span><br><span class="line">            Py_INCREF(startkey);</span><br><span class="line">            cmp = PyObject_RichCompareBool(startkey, key, Py_EQ);</span><br><span class="line">            Py_DECREF(startkey);</span><br><span class="line">            <span class="keyword">if</span> (cmp &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                *value_addr = <span class="literal">NULL</span>;</span><br><span class="line">                <span class="keyword">return</span> DKIX_ERROR;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (dk == mp-&gt;ma_keys &amp;&amp; ep-&gt;me_key == startkey) &#123;</span><br><span class="line">                <span class="keyword">if</span> (cmp &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    *value_addr = &amp;ep-&gt;me_value;</span><br><span class="line">                    <span class="keyword">if</span> (hashpos != <span class="literal">NULL</span>)</span><br><span class="line">                        *hashpos = i;</span><br><span class="line">                    <span class="keyword">return</span> ix;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">/* The dict was mutated, restart */</span></span><br><span class="line">                <span class="keyword">goto</span> top;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        freeslot = <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// [6] ix == DKIX_DUMMY || ep-&gt;me_hash != hash，沿着探测链搜索下一个位置，直到返回</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> perturb = hash;;) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    assert(<span class="number">0</span>);          <span class="comment">/* NOT REACHED */</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>[6]</code>处以后的执行代码处在一个无限循环当中，不会到达函数的末尾。此处的代码由上面的注释可以看到，分为两种情况可能会到达这里：</p>
+<ol>
+<li>探测到的第一个<code>entry</code>处于<code>Dummy</code>状态，这时会设置<code>freeslot</code>，然后继续寻找；</li>
+<li>探测到的<code>entry</code>出于<code>Active</code>状态，但其中存储的<code>key</code>与要查找的<code>key</code>值不同。</li>
+</ol>
+<p>继续沿着探测链探测的方法则与探索第一个位置的方法没有什么区别。</p>
+<p>探测时候按照以下的规则确定返回值：</p>
+<ol>
+<li>如果探测到的<code>slot</code>处于<code>Unused</code>状态，返回<code>DKIX_EMPTY</code>;</li>
+<li>如果探测到的<code>slot</code>处于<code>Active</code>状态，比较两个<code>entry</code>的内容是否相同，相同也有两种情况：a) 引用相同；b) 引用不同但是值相同；相同就返回，不同就继续探测；比较出错就返回<code>DKIX_ERROR</code>；</li>
+<li>如果探测到的<code>slot</code>处于<code>Dummy</code>状态，继续探测，直到满足前两条。</li>
+</ol>
+<p><code>Python 3</code>与<code>Python 2</code>的另一点不同在于，<code>Python 2</code>返回的是指向所在<code>entry</code>的指针，而<code>Python 3</code>则返回<code>index</code>，这可能是由于前者可能会采用<code>split-table</code>结构存储的缘故。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/24/《Python源码剖析》阅读笔记12/">http://nagisa.co/2017/07/24/《Python源码剖析》阅读笔记12/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/08/08/《Python源码剖析》阅读笔记13/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记13</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/20/《Python源码剖析》阅读笔记11/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记11</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

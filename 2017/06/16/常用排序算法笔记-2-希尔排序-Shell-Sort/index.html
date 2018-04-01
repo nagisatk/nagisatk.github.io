@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="常用排序算法笔记(2) - 希尔排序(Shell Sort)"/>
+
+
+
+
+  <meta name="keywords" content="Note, Sort Algorithm, Shell Sort, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/16/常用排序算法笔记-2-希尔排序-Shell-Sort/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 常用排序算法笔记(2) - 希尔排序(Shell Sort) - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          常用排序算法笔记(2) - 希尔排序(Shell Sort)
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-16
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#希尔排序"><span class="toc-text">希尔排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码实现"><span class="toc-text">代码实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试"><span class="toc-text">测试</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>本文介绍了排序算法中的希尔排序。<br><a id="more"></a></p>
+<h2 id="希尔排序"><a href="#希尔排序" class="headerlink" title="希尔排序"></a>希尔排序</h2><blockquote>
+<p>它（希尔排序）通过比较相距一定距离的元素来工作；各趟比较所用的距离随着算法的进行而减小，直到只比较相邻元素的最后一趟排序为止。<br><!-- more --><br>希尔排序使用一个序列h<sub>1</sub>，h<sub>2</sub>，…，h<sub>t</sub>，叫做<strong>增量序列</strong>。</p>
+</blockquote>
+<p>希尔排序的每次遍历都只遍历需排序数组的一个子集，并在这个子集上进行排序。</p>
+<p>下面是一个例子：</p>
+<table>
+<thead>
+<tr>
+<th>初始</th>
+<th><code>81  94  11  96  12  35  17  95  28  58  41  75  15</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在5-排序后</td>
+<td><code>35  17  11  28  12  41  75  15  96  58  81  94  95</code></td>
+</tr>
+<tr>
+<td>在3-排序后</td>
+<td><code>28  12  11  35  15  41  58  17  94  75  81  96  95</code></td>
+</tr>
+<tr>
+<td>在1-排序后</td>
+<td><code>11  12  15  17  28  35  41  58  75  81  94  95  96</code></td>
+</tr>
+</tbody>
+</table>
+<p>希尔排序的过程比插入排序要复杂。</p>
+<p>当增量为<code>5</code>时，就会将所有距离为<code>5</code>的元素进行排序，如<code>5-排序</code>的结果，<code>35 ... 41 ... 81</code>，<code>17 ... 75 ... 94</code>……这些子序列已经被排好序了。</p>
+<p>当增量为<code>1</code>时，遍历的子集就是数据集合本身，遍历完成后，所有的数据就都排序完毕了。</p>
+<p>正如上面所说，希尔排序每次只遍历目标数组的一个子集，为了排序整个数组，遍历的次数就会多一些。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>尽管说起来很复杂，但希尔排序的代码实现十分简单。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ShellSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, j, increment;</span><br><span class="line">    <span class="keyword">int</span> tmp;</span><br><span class="line">    <span class="keyword">for</span>(increment = n/<span class="number">2</span>; increment &gt; <span class="number">0</span>; increment /= <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span>(i = increment; i &lt; n; i ++) &#123;</span><br><span class="line">            tmp = eles[i];</span><br><span class="line">            <span class="keyword">for</span>(j = i; j &gt;= increment; j -= increment)</span><br><span class="line">                <span class="keyword">if</span>(tmp &lt; eles[j - increment])</span><br><span class="line">                    eles[j] = eles[j - increment];</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                eles[j] = tmp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上例中使用的是希尔建议的序列，这种序列并不好。但即使是不好的序列，给出的结果也比插入排序要快。这是因为，虽然使用希尔增量时，希尔排序的最坏情形运行时间为<code>ϴ(n</code><sup><code>2</code></sup><code>)</code>，但这种事不不会经常发生。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>测试数量用的最大值是<code>2^20</code>，一共测试的<code>8</code>次。</p>
+<table>
+<thead>
+<tr>
+<th>MinValue</th>
+<th>MaxValue</th>
+<th>Numbers</th>
+<th>Used Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>218</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>215</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>203</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>664</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>655</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>733</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>1263</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>958</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>1008</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>1137</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>1541</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>1397</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>1670</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>1850</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>1558</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>2585</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>2568</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>2655</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>2547</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>2381</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>2652</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>4403</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>4365</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>5596</td>
+</tr>
+</tbody>
+</table>
+<p>在插入排序的测试中，排序数据达到<code>100000</code>的时候，给出的运行时间大概是<code>10000</code>(单位是<code>clock</code>)。但希尔排序在数据量超过<code>1000000</code>之后，给出的消耗时间也只有<code>5000 clock</code>左右。</p>
+<p>下面是简单的可视化：</p>
+<p><canvas style="margin:0px 20%;width: 60%; background-color: gray;" id="blue"></canvas></p>
+<script type="text/javascript">
+        var data = [218, 215, 203, 664, 655, 733, 1263, 958, 1008, 1137, 1541, 1397, 1670, 1850, 1558, 2585, 2568, 2655, 2547, 2381, 2652, 4403, 4365, 5596]
+        var canvas = document.getElementById('blue')
+        var ctx = canvas.getContext("2d")
+        canvas.width = canvas.offsetWidth
+        canvas.height = canvas.offsetHeight
+
+        var widht = canvas.offsetWidth
+        var height = canvas.offsetHeight
+        var delta = canvas.offsetWidth / 12
+        var x = 0
+        var max = 0
+        for(var k = 1; k < 4; k++) {
+            if(data[data.length - k] > max)
+                max = data[data.length - k]
+        }
+        ctx.fillStyle = 'black'
+        for(var i = 0; i < 30; i += 3) {
+            x += delta
+            for(var j = 0; j < 3; j ++) {
+                var y = Math.floor(data[i+j]/max * height * 0.9)
+                ctx.beginPath()
+                ctx.arc(Math.floor(x), height - y, 3, 0, 2*Math.PI, true)
+                ctx.fill()
+            }
+        }
+</script>
+
+<p>可以看出希尔排序是一种不稳定的排序，同样的数据量在不同情况下的时间差距甚至达到了<code>1/5</code>。这种不稳定的排序方法的运行时间分析起来并不简单，正如书上所说：</p>
+<blockquote>
+<p>虽然希尔排序编程简单，但是，其运行时间的分析则完全是另外一回事。希尔排序的运行时间依赖于增量序列的选择，其证明可能相当复杂。</p>
+</blockquote>
+<p>书上给出了希尔排序在选择集中增量序列的情形下运行时间上界的简略证明，但我并不打算写下来。我使用其中的一种增量序列修改了希尔排序的实现，</p>
+<p>这个增量序列形如<code>1, 3, 7, ..., 2^k - 1</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ShellSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, j, increment;</span><br><span class="line">    <span class="keyword">int</span> tmp;</span><br><span class="line">    increment = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span>(increment &lt; n/<span class="number">2</span>)</span><br><span class="line">        increment &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(increment -= <span class="number">1</span>; increment &gt; <span class="number">0</span>; increment = ((increment + <span class="number">1</span>) &gt;&gt; <span class="number">1</span>) - <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span>(i = increment; i &lt; n; i ++) &#123;</span><br><span class="line">            tmp = eles[i];</span><br><span class="line">            <span class="keyword">for</span>(j = i; j &gt;= increment; j -= increment)</span><br><span class="line">                <span class="keyword">if</span>(tmp &lt; eles[j - increment])</span><br><span class="line">                    eles[j] = eles[j - increment];</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                eles[j] = tmp;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>MinValue</th>
+<th>MaxValue</th>
+<th>Numbers</th>
+<th>Used Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>54</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>54</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>55</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>117</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>124</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>120</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>195</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>199</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>193</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>263</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>261</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>278</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>365</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>357</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>354</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>453</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>439</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>430</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>513</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>509</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>530</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>594</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>599</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>612</td>
+</tr>
+</tbody>
+</table>
+<p><canvas style="margin:0px 20%;width: 60%; background-color: gray;" id="red"></canvas></p>
+<script type="text/javascript">
+        var data2 = [54, 54, 55, 117, 124, 120, 195, 199, 193, 263, 261, 278, 365, 357, 354, 453, 439, 430, 513, 509, 530, 594, 599, 612]
+        var canvas2 = document.getElementById('red')
+        var ctx2 = canvas2.getContext("2d")
+        canvas2.width = canvas2.offsetWidth
+        canvas2.height = canvas2.offsetHeight
+
+        var widht2 = canvas2.offsetWidth
+        var height2 = canvas2.offsetHeight
+        var delta2 = canvas2.offsetWidth / 12
+        var x2 = 0
+        var max2 = 0
+        for(var k2 = 1; k2 < 4; k2++) {
+            if(data2[data2.length - k2] > max2)
+                max2 = data2[data2.length - k2]
+        }
+        ctx2.fillStyle = 'black'
+        for(var i2 = 0; i2 < 30; i2 += 3) {
+            x2 += delta2
+            for(var j2 = 0; j2 < 3; j2 ++) {
+                var y2 = Math.floor(data2[i2+j2]/max2 * height2 * 0.9)
+                ctx2.beginPath()
+                ctx2.arc(Math.floor(x2), height2 - y2, 3, 0, 2*Math.PI, true)
+                ctx2.fill()
+            }
+        }
+</script>
+
+<p>这是其中一次的运行结果。</p>
+<p>看起来效率确实提高了不少。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/16/常用排序算法笔记-2-希尔排序-Shell-Sort/">http://nagisa.co/2017/06/16/常用排序算法笔记-2-希尔排序-Shell-Sort/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Note/">Note</a>
+            
+              <a href="/tags/Sort-Algorithm/">Sort Algorithm</a>
+            
+              <a href="/tags/Shell-Sort/">Shell Sort</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/17/常用排序算法笔记-3-堆排序-Heap-Sort/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">常用排序算法笔记(3) - 堆排序(Heap Sort)</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/14/常用排序算法笔记(1)-插入排序(Insert-Sort)/">
+        <span class="next-text nav-default">常用排序算法笔记(1) - 插入排序(Insert Sort)</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

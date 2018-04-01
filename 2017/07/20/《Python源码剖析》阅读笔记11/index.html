@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记11"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/20/《Python源码剖析》阅读笔记11/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记11 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记11
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-20
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#dict中的entry"><span class="toc-text">dict中的entry</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-2和Python-3中dict的实现区别"><span class="toc-text">Python 2和Python 3中dict的实现区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-2中dict的创建"><span class="toc-text">Python 2中dict的创建</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>Python</code>中<code>dict</code>对象的实现方式。<br><a id="more"></a></p>
+<h2 id="dict中的entry"><a href="#dict中的entry" class="headerlink" title="dict中的entry"></a>dict中的entry</h2><p>在<code>dict</code>中，<code>key-value</code>结构（键值对）叫做<code>entry</code>。在同一个<code>dict</code>中，每个<code>entry</code>的<code>key</code>都不同，用来作为获取<code>value</code>的索引。</p>
+<p>在<code>Python</code>中，一个<code>entry</code>的基本结构如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="comment">/* Cached hash code of me_key. */</span></span><br><span class="line">    Py_hash_t me_hash;</span><br><span class="line">    PyObject *me_key;</span><br><span class="line">    PyObject *me_value; <span class="comment">/* This field is only meaningful for combined tables */</span></span><br><span class="line">&#125; PyDictKeyEntry;</span><br></pre></td></tr></table></figure></p>
+<p>这是<code>Python 3</code>中的<code>PyDictKeyEntry</code>。<code>Python 3</code>中的<code>dict</code>的实现和<code>Python 2</code>中的实现有一定的区别，不过这个<code>entry</code>的结构还是一致的。</p>
+<p>结构体中的<code>me_hash</code>保存当前<code>key</code>的<code>hash</code>值，以便比较的时候不需要每次都重复计算。</p>
+<p><code>me_key</code>和<code>me_value</code>则表示键值对中的两个值，但为了方便使用了通用的<code>PyObject</code>指针。这样在<code>dict</code>中任何数据类型都放得下。</p>
+<p>不过有一点需要注意的是，尽管<code>PyObject</code>指针可以指向任何<code>Python</code>对象，但如果使用<code>list</code>等对象的话，会报出<code>unhashable type</code>的<code>TypeError</code>。</p>
+<h2 id="Python-2和Python-3中dict的实现区别"><a href="#Python-2和Python-3中dict的实现区别" class="headerlink" title="Python 2和Python 3中dict的实现区别"></a>Python 2和Python 3中dict的实现区别</h2><p>一点显著的区别是，在<code>Python 2</code>中，每个<code>entry</code>有三种状态：</p>
+<ol>
+<li><code>Unused</code>，<code>index == DKIX_EMPTY</code>。这也是<code>entry</code>的初始化状态，<code>me_key</code>和<code>me_value</code>都是<code>NULL</code>。这个状态的<code>entry</code>可以转化为<code>Active</code>状态；</li>
+<li><code>Active</code>，<code>index &gt;= 0, me_key != NULL and me_value != NULL</code>。这时候，该<code>entry</code>中存储了一个键值对，<code>me_key</code>和<code>me_value</code>都是<code>NULL</code>。这也是唯一一种<code>me_value</code>不为<code>NULL</code>的状态；</li>
+<li><code>Dummy</code>，<code>index == DKIX_DUMMY</code>。<code>dict</code>中的一个元素被删除了，这个元素所在的<code>entry</code>也不能从<code>dict</code>中删掉，状态也不能直接转到<code>Unused</code>，否则会导致探测链断掉，其后的元素无法被探测。但这个元素确实已经不再处于<code>Active</code>状态了。这种情况下，该<code>entry</code>就转为<code>Dummy</code>状态。</li>
+</ol>
+<p>但在<code>Python 3</code>中，会多一种状态</p>
+<ul>
+<li><code>Pending</code>. <code>index &gt;= 0, key != NULL</code>, and <code>value == NULL</code>。这种状态只发生在<code>split-table</code>中，表示还没有插入到<code>split-table</code>中。</li>
+</ul>
+<p>这就涉及到了<code>Python 2</code>和<code>Python 3</code>中<code>dict</code>的最主要的一点区别，即<code>dict</code>在内存中的布局的区别。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">dictobject</span> <span class="title">PyDictObject</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">dictobject</span> &#123;</span></span><br><span class="line">    PyObject_HEAD</span><br><span class="line">    Py_ssize_t ma_fill;  <span class="comment">/* # Active + # Dummy */</span></span><br><span class="line">    Py_ssize_t ma_used;  <span class="comment">/* # Active */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* The table contains ma_mask + 1 slots, and that's a power of 2.</span></span><br><span class="line"><span class="comment">     * We store the mask instead of the size because the mask is more</span></span><br><span class="line"><span class="comment">     * frequently needed.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    Py_ssize_t ma_mask;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* ma_table points to ma_smalltable for small tables, else to</span></span><br><span class="line"><span class="comment">     * additional malloc'ed memory.  ma_table is never NULL!  This rule</span></span><br><span class="line"><span class="comment">     * saves repeated runtime null-tests in the workhorse getitem and</span></span><br><span class="line"><span class="comment">     * setitem calls.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    PyDictEntry *ma_table;</span><br><span class="line">    PyDictEntry *(*ma_lookup)(PyDictObject *mp, PyObject *key, <span class="keyword">long</span> hash);</span><br><span class="line">    PyDictEntry ma_smalltable[PyDict_MINSIZE];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>以上是<code>Python 2</code>中的<code>PyDictObject</code>的声明，从注释中可以看到，如果<code>dict</code>中的元素比较少，那么元素会存储在<code>ma_smalltable</code>当中，这个数组包含<code>PyDict_MINSIZE</code>个元素。</p>
+<p>而<code>Python 3</code>中的<code>PyDictObject</code>的声明如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* The ma_values pointer is NULL for a combined table</span></span><br><span class="line"><span class="comment"> * or points to an array of PyObject* for a split table</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    PyObject_HEAD</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Number of items in the dictionary */</span></span><br><span class="line">    Py_ssize_t ma_used;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Dictionary version: globally unique, value change each time</span></span><br><span class="line"><span class="comment">       the dictionary is modified */</span></span><br><span class="line">    <span class="keyword">uint64_t</span> ma_version_tag;</span><br><span class="line"></span><br><span class="line">    PyDictKeysObject *ma_keys;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* If ma_values is NULL, the table is "combined": keys and values</span></span><br><span class="line"><span class="comment">       are stored in ma_keys.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">       If ma_values is not NULL, the table is splitted:</span></span><br><span class="line"><span class="comment">       keys are stored in ma_keys and values are stored in ma_values */</span></span><br><span class="line">    PyObject **ma_values;</span><br><span class="line">&#125; PyDictObject;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到<code>Python 3</code>中的<code>dict</code>在内存中有两种布局方式：</p>
+<ol>
+<li><code>keys</code>和<code>values</code>都存在<code>ma_key</code>中，这时候，<code>dict</code>的<code>table</code>是<code>combined</code>的，<code>**ma_values</code>这个指针则是空；</li>
+<li><code>keys</code>和<code>values</code>分开存储，分别在<code>ma_keys</code>和<code>ma_values</code>中，这时候，<code>table</code>是<code>splitted</code>的。</li>
+</ol>
+<p>相比起来，在<code>dict</code>中的元素比较少的时候，<code>Python 2</code>中的<code>dict</code>结构更紧凑一些，<code>Python 3</code>中的<code>dict</code>则无论大小，存放元素的<code>table</code>都是重新申请的内存空间。</p>
+<p>不过，<code>Python 2</code>中的布局方式也有一些缺点，就是当<code>dict</code>的体积比较大的时候，会造成<code>ma_smalltable</code>所指向的空间浪费掉。</p>
+<p><em>一个插曲：</em></p>
+<blockquote>
+<p><code>PyDictObject</code>中的<code>ma_mask</code>实际上记录了一个<code>PyDictObject</code>对象中所拥有的<code>entry</code>的数量。至于这家伙为什么不叫<code>ma_size</code>这么好听的名字，偏偏要特立独行，取一个<code>ma_mask</code>这样莫名其妙的名字，此乃后话，这里先按下不表。</p>
+</blockquote>
+<p>虽然书中按下不表，我却在<code>Python 2</code>的源码中发现相关的注释（如果不是<code>Python 2</code>和<code>Python 3</code>对<code>dict</code>的实现区别太大，我也不会去翻前者的代码。）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/* The table contains ma_mask + 1 slots, and that&apos;s a power of 2.</span><br><span class="line"> * We store the mask instead of the size because the mask is more</span><br><span class="line"> * frequently needed.</span><br><span class="line"> */</span><br></pre></td></tr></table></figure></p>
+<p>注释和书中的论述稍微有点区别。根据注释中的说法，<code>ma_mask</code>实际上是“一个<code>PyDictObject</code>对象中所<strong>能够</strong>拥有的<code>entry</code>的数量<strong>减<code>1</code></strong>”。</p>
+<p>例如，新创建的一个<code>dict</code>对象，他所拥有的<code>entry</code>应该是<code>0</code>(<code>size</code>是<code>0</code>)，但是其<code>ma_mask</code>则是<code>7</code>(<code>PyDict_MINSIZE - 1</code>)。</p>
+<p>后边书中给出的解释是：</p>
+<blockquote>
+<p><code>ma_mask</code>的初始值为<code>PyDict_MINSIZE-1</code>，确实与一个<code>PyDictObject</code>对象中<code>entry</code>的数量有关。</p>
+</blockquote>
+<p>所以应该是前面的表达略有不妥吧。</p>
+<h2 id="Python-2中dict的创建"><a href="#Python-2中dict的创建" class="headerlink" title="Python 2中dict的创建"></a>Python 2中dict的创建</h2><p><code>dict</code>对象通过<code>PyDict_New</code>方法来创建：<br><code>Python 2</code>中的<code>PyDict_New</code>：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INIT_NONZERO_DICT_SLOTS(mp) do &#123;                                \</span></span><br><span class="line">    (mp)-&gt;ma_table = (mp)-&gt;ma_smalltable;                               \</span><br><span class="line">    (mp)-&gt;ma_mask = PyDict_MINSIZE - <span class="number">1</span>;                                 \</span><br><span class="line">    &#125; <span class="keyword">while</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EMPTY_TO_MINSIZE(mp) do &#123;                                       \</span></span><br><span class="line">    <span class="built_in">memset</span>((mp)-&gt;ma_smalltable, <span class="number">0</span>, <span class="keyword">sizeof</span>((mp)-&gt;ma_smalltable));        \</span><br><span class="line">    (mp)-&gt;ma_used = (mp)-&gt;ma_fill = <span class="number">0</span>;                                  \</span><br><span class="line">    INIT_NONZERO_DICT_SLOTS(mp);                                        \</span><br><span class="line">    &#125; <span class="keyword">while</span>(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">PyObject *</span><br><span class="line">PyDict_New(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">register</span> PyDictObject *mp;</span><br><span class="line">    <span class="keyword">if</span> (dummy == <span class="literal">NULL</span>) &#123; <span class="comment">/* Auto-initialize dummy */</span></span><br><span class="line">        dummy = PyString_FromString(<span class="string">"&lt;dummy key&gt;"</span>);</span><br><span class="line">        <span class="keyword">if</span> (dummy == <span class="literal">NULL</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (numfree) &#123;</span><br><span class="line">        <span class="comment">// [1]使用缓冲池</span></span><br><span class="line">        ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        mp = PyObject_GC_New(PyDictObject, &amp;PyDict_Type);</span><br><span class="line">        <span class="keyword">if</span> (mp == <span class="literal">NULL</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        EMPTY_TO_MINSIZE(mp);</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    mp-&gt;ma_lookup = lookdict_string;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> (PyObject *)mp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到上述提到的<code>dummy</code>对象是一个<code>str</code>对象，所有处于<code>dummy</code>状态的<code>entry</code>都会引用这个对象。</p>
+<p>如果不使用缓冲池的话，则会使用两个宏对新生的<code>dict</code>对象进行初始化。</p>
+<p><code>Python 3</code>中的<code>PyDict_New</code>和这个的区别还是挺大的：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PyObject *</span><br><span class="line">PyDict_New(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">    PyDictKeysObject *keys = new_keys_object(PyDict_MINSIZE);</span><br><span class="line">    <span class="keyword">if</span> (keys == <span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">return</span> new_dict(keys, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>要想初始化一个<code>dict</code>对象，<code>Python 3</code>进行了两部分工作：</p>
+<ol>
+<li>初始化一个<code>PyDictKeysObject</code>对象，大小是<code>PyDict_MINSIZE</code>(这个值在<code>Python 3</code>中也是<code>8</code>)；</li>
+<li>使用上述<code>PyDictKeysObject</code>对象完成<code>PyDictObject</code>的初始化。</li>
+</ol>
+<p>和<code>Python 2</code>不同，<code>Python 3</code>中<code>entry</code>的存储始终和<code>dict</code>的结构体是分离的，并不占用连续的内存空间，所以要分成两部分进行初始化。</p>
+<p><code>Python 3</code>中的<code>dict</code>也使用了缓冲池，但与<code>Python 2</code>中<code>dict</code>的缓冲池也有一定的区别。这部分单分出一小节来记录吧。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/20/《Python源码剖析》阅读笔记11/">http://nagisa.co/2017/07/20/《Python源码剖析》阅读笔记11/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/24/《Python源码剖析》阅读笔记12/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记12</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/18/《Python源码剖析》阅读笔记10/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记10</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

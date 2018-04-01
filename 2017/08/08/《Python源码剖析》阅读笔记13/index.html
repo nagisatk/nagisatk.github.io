@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记13"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/08/08/《Python源码剖析》阅读笔记13/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记13 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记13
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-08-08
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#shared-key"><span class="toc-text">shared key</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#插入操作"><span class="toc-text">插入操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调整dict大小的策略"><span class="toc-text">调整dict大小的策略</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>Python</code>中<code>dict</code>的实现(3)：插入和删除(上)。<br><a id="more"></a></p>
+<h2 id="shared-key"><a href="#shared-key" class="headerlink" title="shared key"></a>shared key</h2><p><code>Python 3</code>的源码中有段注释提到了<code>shared key</code>。这是<code>Python 3</code>中<code>dict</code>为了节省内存而使用的一种存储方式。也是加入了<code>split table</code>的<code>dict</code>的实现的一部分。</p>
+<p>对这项更新的说明在<a href="https://www.python.org/dev/peps/pep-0412/" target="_blank" rel="noopener"><em>PEP 412</em></a>。</p>
+<p>如上所说，这种方式的主要作用是节省内存。这主要作用于<code>Python</code>的面向对象代码，同一个类的不同实例用来存储属性的<code>dict</code>，可以共享<code>key</code>和<code>hash</code>，在实例比较多的情况下，可以节省部分内存。</p>
+<p>根据<code>PEP 412</code>中的测试结果，</p>
+<blockquote>
+<p>Benchmarking shows no significant change of speed for most benchmarks. Object-oriented benchmarks show small speed ups when they create large numbers of objects of the same class (the gcbench benchmark shows a 10% speed up; this is likely to be an upper limit). </p>
+</blockquote>
+<h2 id="插入操作"><a href="#插入操作" class="headerlink" title="插入操作"></a>插入操作</h2><p>插入函数如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">insertdict(PyDictObject *mp, PyObject *key, Py_hash_t hash, PyObject *value)</span><br><span class="line">&#123;</span><br><span class="line">    PyObject *old_value;</span><br><span class="line">    PyObject **value_addr;</span><br><span class="line">    PyDictKeyEntry *ep, *ep0;</span><br><span class="line">    Py_ssize_t hashpos, ix;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mp-&gt;ma_values != <span class="literal">NULL</span> &amp;&amp; !PyUnicode_CheckExact(key)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (insertion_resize(mp) &lt; <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// [1]</span></span><br><span class="line">    ix = mp-&gt;ma_keys-&gt;dk_lookup(mp, key, hash, &amp;value_addr, &amp;hashpos);</span><br><span class="line">    <span class="keyword">if</span> (ix == DKIX_ERROR) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    assert(PyUnicode_CheckExact(key) || mp-&gt;ma_keys-&gt;dk_lookup == lookdict);</span><br><span class="line">    Py_INCREF(value);</span><br><span class="line">    MAINTAIN_TRACKING(mp, key, value);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* When insertion order is different from shared key, we can't share</span></span><br><span class="line"><span class="comment">     * the key anymore.  Convert this instance to combine table.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">if</span> (_PyDict_HasSplitTable(mp) &amp;&amp;</span><br><span class="line">        ((ix &gt;= <span class="number">0</span> &amp;&amp; *value_addr == <span class="literal">NULL</span> &amp;&amp; mp-&gt;ma_used != ix) ||</span><br><span class="line">         (ix == DKIX_EMPTY &amp;&amp; mp-&gt;ma_used != mp-&gt;ma_keys-&gt;dk_nentries))) &#123;</span><br><span class="line">        <span class="keyword">if</span> (insertion_resize(mp) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            Py_DECREF(value);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        find_empty_slot(mp, key, hash, &amp;value_addr, &amp;hashpos);</span><br><span class="line">        ix = DKIX_EMPTY;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// [2]</span></span><br><span class="line">    <span class="keyword">if</span> (ix == DKIX_EMPTY) &#123;</span><br><span class="line">        <span class="comment">/* Insert into new slot. */</span></span><br><span class="line">        <span class="keyword">if</span> (mp-&gt;ma_keys-&gt;dk_usable &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">/* Need to resize. */</span></span><br><span class="line">            <span class="keyword">if</span> (insertion_resize(mp) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                Py_DECREF(value);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            find_empty_slot(mp, key, hash, &amp;value_addr, &amp;hashpos);</span><br><span class="line">        &#125;</span><br><span class="line">        ep0 = DK_ENTRIES(mp-&gt;ma_keys);</span><br><span class="line">        ep = &amp;ep0[mp-&gt;ma_keys-&gt;dk_nentries];</span><br><span class="line">        dk_set_index(mp-&gt;ma_keys, hashpos, mp-&gt;ma_keys-&gt;dk_nentries);</span><br><span class="line">        Py_INCREF(key);</span><br><span class="line">        <span class="comment">// [3]</span></span><br><span class="line">        ep-&gt;me_key = key;</span><br><span class="line">        ep-&gt;me_hash = hash;</span><br><span class="line">        <span class="keyword">if</span> (mp-&gt;ma_values) &#123;</span><br><span class="line">            assert (mp-&gt;ma_values[mp-&gt;ma_keys-&gt;dk_nentries] == <span class="literal">NULL</span>);</span><br><span class="line">            mp-&gt;ma_values[mp-&gt;ma_keys-&gt;dk_nentries] = value;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            ep-&gt;me_value = value;</span><br><span class="line">        &#125;</span><br><span class="line">        mp-&gt;ma_used++;</span><br><span class="line">        mp-&gt;ma_version_tag = DICT_NEXT_VERSION();</span><br><span class="line">        mp-&gt;ma_keys-&gt;dk_usable--;</span><br><span class="line">        mp-&gt;ma_keys-&gt;dk_nentries++;</span><br><span class="line">        assert(mp-&gt;ma_keys-&gt;dk_usable &gt;= <span class="number">0</span>);</span><br><span class="line">        assert(_PyDict_CheckConsistency(mp));</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    assert(value_addr != <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">// [4]</span></span><br><span class="line">    old_value = *value_addr;</span><br><span class="line">    <span class="keyword">if</span> (old_value != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        *value_addr = value;</span><br><span class="line">        mp-&gt;ma_version_tag = DICT_NEXT_VERSION();</span><br><span class="line">        assert(_PyDict_CheckConsistency(mp));</span><br><span class="line"></span><br><span class="line">        Py_DECREF(old_value); <span class="comment">/* which **CAN** re-enter (see issue #22653) */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* pending state */</span></span><br><span class="line">    assert(_PyDict_HasSplitTable(mp));</span><br><span class="line">    assert(ix == mp-&gt;ma_used);</span><br><span class="line">    *value_addr = value;</span><br><span class="line">    mp-&gt;ma_used++;</span><br><span class="line">    mp-&gt;ma_version_tag = DICT_NEXT_VERSION();</span><br><span class="line">    assert(_PyDict_CheckConsistency(mp));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>[1]</code>处的代码查找对应的<code>key</code>和<code>hash</code>。<br>如果返回的结果是<code>DKIX_ERROR</code>则说明出现错误。返回值<code>-1</code>代表插入不成功。</p>
+<p><code>[2]</code>处上方的代码确定这个<code>dict</code>是以<code>split table</code>方式存储的，并且使用了<code>shared key</code>的存储方式。之后在<code>[2]</code>下方的<code>if</code>语句中找到合适的位置。</p>
+<p><code>[3]</code>处的代码是设置新的<code>slot</code>中的<code>value</code>的值，并对<code>dict</code>进行一些插入后的操作。由于在插入之前(可能)调用了<code>insertion_resize</code>函数，所以现在的<code>dict</code>并不能直接判定是否依旧使用了<code>split table</code>方式进行存储，因而在设置<code>value</code>值的时候需要判断一下。</p>
+<p><code>[4]</code>处的代码在<code>[2]</code>处下方的代码未执行的情况下执行的，这时候并未找到空的<code>slot</code>，只需要将找到的<code>slot</code>的值替换为要插入的值就可以了。</p>
+<h2 id="调整dict大小的策略"><a href="#调整dict大小的策略" class="headerlink" title="调整dict大小的策略"></a>调整dict大小的策略</h2><p>上面说到调用<code>insertion_resize</code>函数，这个函数本质上只是调用了<code>dictresize</code>函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">insertion_resize(PyDictObject *mp)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> dictresize(mp, GROWTH_RATE(mp));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>GROWTH_RATE</code>宏的实现与<code>Python 2</code>中也有不同：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> GROWTH_RATE(d) (((d)-&gt;ma_used*2)+((d)-&gt;ma_keys-&gt;dk_size&gt;&gt;1))</span></span><br></pre></td></tr></table></figure></p>
+<p>在这个宏的注释中提到，<code>Python 3.2.x</code>中的主要参数还是<code>*4</code>，在<code>Python 3.3.0</code>中就已经变成了<code>*2</code>。</p>
+<p>而在<code>Python 2</code>中，调整<code>dict</code>大小的策略则基于<code>dict</code>中的<code>ma_used</code>的大小，如果这个值大于<code>50000</code>就<code>*2</code>，否则就<code>*4</code>。</p>
+<p>新的策略更为复杂一些。根据下边的比较可以得出以下结论：</p>
+<ol>
+<li>如果原有的数据量小于原有大小的<code>1/4</code>，那么它也会小于现有大小的<code>1/4</code>，但新的<code>dict</code>缩小了；</li>
+<li>如果原有的数据量大于原有大小的<code>1/4</code>，那么它也会大于现有大小的<code>1/4</code>，但新的<code>dict</code>扩大了。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">if used &lt; size/4:</span><br><span class="line">    used*4  &lt; used*2 + size/4*2</span><br><span class="line">            = used*2 + size/2</span><br><span class="line">            = newsize</span><br><span class="line">    used    &lt; newsize/4</span><br><span class="line">    newsize = used*2 + size/2</span><br><span class="line">            &lt; size/4*2 + size/2</span><br><span class="line">            = size</span><br><span class="line"></span><br><span class="line">if used &gt; size/4:</span><br><span class="line">    used*4  &gt; used*2 + size/4*2</span><br><span class="line">            = used*2 + size/2</span><br><span class="line">            = newsize</span><br><span class="line">    used    &gt; newsize/4</span><br><span class="line">    newsize = used*2 + size/2</span><br><span class="line">            &gt; size/4*2 + size/2</span><br><span class="line">            = size</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/08/08/《Python源码剖析》阅读笔记13/">http://nagisa.co/2017/08/08/《Python源码剖析》阅读笔记13/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/08/10/《Python源码剖析》阅读笔记14/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记14</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/24/《Python源码剖析》阅读笔记12/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记12</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

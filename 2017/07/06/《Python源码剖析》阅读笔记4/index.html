@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记4"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/06/《Python源码剖析》阅读笔记4/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记4 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记4
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-06
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#小整数的完全缓存实现"><span class="toc-text">小整数的完全缓存实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#大整数的处理方法"><span class="toc-text">大整数的处理方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一点猜想"><span class="toc-text">一点猜想</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gt-gt-略去的部分"><span class="toc-text">&gt;&gt;略去的部分</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>小整数的特殊处理。<br><a id="more"></a></p>
+<h2 id="小整数的完全缓存实现"><a href="#小整数的完全缓存实现" class="headerlink" title="小整数的完全缓存实现"></a>小整数的完全缓存实现</h2><p>对于小的整数对象<code>[-5, 257)</code>，<code>Python</code>会完全缓存所有整数对象。这部分代码在<code>longobject.c</code>(如果是<code>Python 2</code>则应该在<code>intobject.c</code>中。)：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[longobject.c]</span><br><span class="line"><span class="comment">/* Small integers are preallocated in this array so that they</span></span><br><span class="line"><span class="comment">   can be shared.</span></span><br><span class="line"><span class="comment">   The integers that are preallocated are those in the range</span></span><br><span class="line"><span class="comment">   -NSMALLNEGINTS (inclusive) to NSMALLPOSINTS (not inclusive).</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">static</span> PyLongObject small_ints[NSMALLNEGINTS + NSMALLPOSINTS];</span><br></pre></td></tr></table></figure>
+<p>注释还是比较清晰的。</p>
+<p>这些小整数由<code>_PyLong_Init(void)</code>函数初始化：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">[longobject.c]</span><br><span class="line"><span class="keyword">int</span></span><br><span class="line">_PyLong_Init(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> NSMALLNEGINTS + NSMALLPOSINTS &gt; 0</span></span><br><span class="line">    <span class="keyword">int</span> ival, size;</span><br><span class="line">    PyLongObject *v = small_ints;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (ival = -NSMALLNEGINTS; ival &lt;  NSMALLPOSINTS; ival++, v++) &#123;</span><br><span class="line">        size = (ival &lt; <span class="number">0</span>) ? <span class="number">-1</span> : ((ival == <span class="number">0</span>) ? <span class="number">0</span> : <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (Py_TYPE(v) == &amp;PyLong_Type) &#123;</span><br><span class="line">            <span class="comment">/* The element is already initialized, most likely</span></span><br><span class="line"><span class="comment">             * the Python interpreter was initialized before.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            Py_ssize_t refcnt;</span><br><span class="line">            PyObject* op = (PyObject*)v;</span><br><span class="line"></span><br><span class="line">            refcnt = Py_REFCNT(op) &lt; <span class="number">0</span> ? <span class="number">0</span> : Py_REFCNT(op);</span><br><span class="line">            _Py_NewReference(op);</span><br><span class="line">            <span class="comment">/* _Py_NewReference sets the ref count to 1 but</span></span><br><span class="line"><span class="comment">             * the ref count might be larger. Set the refcnt</span></span><br><span class="line"><span class="comment">             * to the original refcnt + 1 */</span></span><br><span class="line">            Py_REFCNT(op) = refcnt + <span class="number">1</span>;</span><br><span class="line">            assert(Py_SIZE(op) == size);</span><br><span class="line">            assert(v-&gt;ob_digit[<span class="number">0</span>] == (digit)<span class="built_in">abs</span>(ival));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            (<span class="keyword">void</span>)PyObject_INIT(v, &amp;PyLong_Type);</span><br><span class="line">        &#125;</span><br><span class="line">        Py_SIZE(v) = size;</span><br><span class="line">        v-&gt;ob_digit[<span class="number">0</span>] = (digit)<span class="built_in">abs</span>(ival);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    <span class="comment">/* initialize int_info */</span></span><br><span class="line">    <span class="keyword">if</span> (Int_InfoType.tp_name == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (PyStructSequence_InitType2(&amp;Int_InfoType, &amp;int_info_desc) &lt; <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>使用这些小整数的时候，<code>Python 3</code>提供了另一个函数：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[longobject.c]</span><br><span class="line"><span class="keyword">static</span> PyObject *</span><br><span class="line">get_small_int(sdigit ival)</span><br><span class="line">&#123;</span><br><span class="line">    PyObject *v;</span><br><span class="line">    assert(-NSMALLNEGINTS &lt;= ival &amp;&amp; ival &lt; NSMALLPOSINTS);</span><br><span class="line">    v = (PyObject *)&amp;small_ints[ival + NSMALLNEGINTS];</span><br><span class="line">    Py_INCREF(v);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> COUNT_ALLOCS</span></span><br><span class="line">    <span class="keyword">if</span> (ival &gt;= <span class="number">0</span>)</span><br><span class="line">        quick_int_allocs++;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        quick_neg_int_allocs++;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    <span class="keyword">return</span> v;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="大整数的处理方法"><a href="#大整数的处理方法" class="headerlink" title="大整数的处理方法"></a>大整数的处理方法</h2><p>根据书中的内容：</p>
+<blockquote>
+<p><code>Python</code>的设计者们所做出的妥协是，对于小整数，在小整数对象池中完全地缓存其<code>PyIntObject</code>对象。而对其他整数，<code>Python</code>运行环境将提供一块内存空间，这些内存空间由这些大整数轮流使用，也就是说，谁需要的时候谁就使用。这样免去了不断地<code>malloc</code>之苦，又在一定程度上考虑了效率问题。</p>
+</blockquote>
+<p>但是，在<code>Python 3</code>中并没有和<code>Python 2</code>的<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> BLOCK_SIZE 1000 <span class="comment">/* 1K less typical malloc overhead */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> BHEAD_SIZE 8 <span class="comment">/* Enough for a 64-bit pointer */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> N_INTOBJECTS ((BLOCK_SIZE - BHEAD_SIZE) / sizeof(PyIntObject))</span></span><br></pre></td></tr></table></figure></p>
+<p>三个宏对应的宏（我没有找到）。所以<code>Python 3</code>对于大整数没有采用和<code>Python 2</code>一样的缓存机制。</p>
+<p>在<code>PyObject *PyLong_FromLong(long ival)</code>函数中，返回一个新的整数对象使用的是<code>PyLongObject *_PyLong_New(Py_ssize_t size)</code>函数，这个函数接受一个<code>Py_ssize_t</code>类型的整数，然后返回具有适当大小的<code>PyLongObject</code>对象。</p>
+<p>其中适当的大小由下述表达式确定：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">offsetof(PyLongObject, ob_digit) + <span class="function">size*<span class="title">sizeof</span><span class="params">(digit)</span></span></span><br></pre></td></tr></table></figure></p>
+<p><code>offsetof</code>宏的定义如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> offsetof(s,m) ((size_t)&amp;(((s*)0)-&gt;m))</span></span><br></pre></td></tr></table></figure></p>
+<p><code>offsetof</code>宏确定结构体<code>s</code>中的成员<code>m</code>的偏移量，也就是结构体中<code>m</code>之前所有成员的大小。</p>
+<p>再加上<code>PyLongObject</code>本身是由柔性数组实现的，最终确定的结构体中的<code>digit</code>数组正好包含该对象所需要的<code>digit</code>的数量。</p>
+<p>但是，<code>Python</code>肯定不会每次遇到大整数都去申请内存，所以大整数的背后依旧还是会有内存池。这一点是显而易见的。</p>
+<h2 id="一点猜想"><a href="#一点猜想" class="headerlink" title="一点猜想"></a>一点猜想</h2><p>既然<code>Python 3</code>没有为<code>PyLongObject</code>单独建立通用整数对象池，那么可能也没有为其他的内建对象建立通用对象池，而是所有的内建对象都使用统一的内存池。</p>
+<p>这也是有一点依据的。<code>Python 2</code>的整数对象池是为<code>PyIntObject</code>建立的，每个<code>PyIntObject</code>对象都占据相同大小的内存空间，但这一点对<code>PyLongObject</code>并不成立，所以即使建立了通用的<code>PyLongBoject</code>对象池，也无法保证能够百分之百的利用起来，所以使用通用的内存池是更好的选择。</p>
+<h2 id="gt-gt-略去的部分"><a href="#gt-gt-略去的部分" class="headerlink" title="&gt;&gt;略去的部分"></a>&gt;&gt;略去的部分</h2><p>《Python源码剖析》对于整数进行了一点<code>Hack</code>，证明每次使用的小整数都是同一个对象，也就是脱离<code>Python</code>中的<code>is</code>，去探查整数对象的内存地址，如果两个整数的内存地址是一样的，那么它们必然是同一个对象。这一点与<code>Python</code>对关键字<code>is</code>的实现无关，所以说服力更强一些。</p>
+<p>略过这部分<code>Hack</code>去看下一部分的字符串对象吧。:-)</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/06/《Python源码剖析》阅读笔记4/">http://nagisa.co/2017/07/06/《Python源码剖析》阅读笔记4/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/07/《Python源码剖析》阅读笔记5/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记5</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/05/《Python源码剖析》阅读笔记3/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记3</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

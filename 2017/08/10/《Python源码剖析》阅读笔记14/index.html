@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记14"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/08/10/《Python源码剖析》阅读笔记14/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记14 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记14
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-08-10
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#dictresize"><span class="toc-text">dictresize</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#删除元素"><span class="toc-text">删除元素</span></a>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p><code>Python</code>中<code>dict</code>的实现(4)：插入和删除(下)。<br><a id="more"></a></p>
+<h2 id="dictresize"><a href="#dictresize" class="headerlink" title="dictresize"></a>dictresize</h2><p>在<code>dictresize</code>的实现中，首先要先确定新的<code>dict</code>的大小。这个函数的声明如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">dictresize(PyDictObject *mp, Py_ssize_t minsize)</span><br></pre></td></tr></table></figure></p>
+<p>其中的<code>minisize</code>就是经过计算后的<code>dict</code>的大小。但这个大小并不是最终的<code>dict</code>的大小。</p>
+<p><code>dict</code>的大小由如下的方法确定：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Find the smallest table size &gt; minused. */</span></span><br><span class="line"><span class="keyword">for</span> (newsize = PyDict_MINSIZE;</span><br><span class="line">    newsize &lt; minsize &amp;&amp; newsize &gt; <span class="number">0</span>;</span><br><span class="line">    newsize &lt;&lt;= <span class="number">1</span>)</span><br><span class="line">    ;</span><br></pre></td></tr></table></figure></p>
+<p>从<code>PyDict_MINSIZE</code>开始，如果<code>newsize</code>小于<code>minisize</code>，那么<code>newsize</code>就乘以<code>2</code>。</p>
+<p>所以最终的<code>dict</code>的大小，最小也会和<code>minisize</code>相等，有可能会更大。</p>
+<p>之后会通过：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Allocate a new table. */</span></span><br><span class="line">mp-&gt;ma_keys = new_keys_object(newsize);</span><br></pre></td></tr></table></figure></p>
+<p>重新申请一个<code>newsize</code>大小的<code>PyDictKeysObject</code>对象，来存放新的<code>dict</code>。</p>
+<p>再将原<code>dict</code>中的元素复制到新的<code>dict</code>中去，就基本完成了<code>dictresize</code>的工作。说是基本完成，是因为还有一小点工作要做：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (oldvalues != <span class="literal">NULL</span>) &#123;</span><br><span class="line">    <span class="comment">/* NULL out me_value slot in oldkeys, in case it was shared */</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; oldkeys-&gt;dk_nentries; i++)</span><br><span class="line">        ep0[i].me_value = <span class="literal">NULL</span>;</span><br><span class="line">    DK_DECREF(oldkeys);</span><br><span class="line">    <span class="keyword">if</span> (oldvalues != empty_values) &#123;</span><br><span class="line">        free_values(oldvalues);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    assert(oldkeys-&gt;dk_lookup != lookdict_split);</span><br><span class="line">    assert(oldkeys-&gt;dk_refcnt == <span class="number">1</span>);</span><br><span class="line">    <span class="function">DK_DEBUG_DECREF <span class="title">PyObject_FREE</span><span class="params">(oldkeys)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>无论原<code>dict</code>是不是以<code>combine table</code>存储的<code>dict</code>对象，经过<code>resize</code>之后，都会变成一个<code>combine table</code>的<code>dict</code>对象。</p>
+<p>如果需要的话，可以调用<code>make_keys_shared</code>方法来转换为<code>split table</code>。这也是上方<code>if</code>结构中的<code>else</code>分支中断言<code>assert(oldkeys-&gt;dk_lookup != lookdict_split);</code>的意义。</p>
+<h1 id="删除元素"><a href="#删除元素" class="headerlink" title="删除元素"></a>删除元素</h1><p><code>Python 2</code>中删除元素的操作非常清晰：</p>
+<blockquote>
+<p>流程非常清晰，先计算<code>hash</code>值，然后搜索相应的<code>entry</code>，最后删除<code>entry</code>中维护的元素，并将<code>entry</code>从<code>Active</code>态变换为<code>Dummy</code>态，同时还将调整<code>PyDictObject</code>对象中维护<code>table</code>使用情况的变量。</p>
+</blockquote>
+<p><code>Python 3</code>中则不能这么干。究其原因，还是在于<code>dict</code>对象在内存中的布局不一样。</p>
+<p>在<code>PyDict_DelItem</code>函数中，只是计算了要删除的<code>key</code>的<code>hash</code>值，之后调用了<code>_PyDict_DelItem_KnownHash</code>函数。另外，由于<code>Python 3</code>加入了对<code>unicode</code>的支持，所以计算<code>hash</code>值也和<code>Python 2</code>有所不同，需要先将<code>key</code>强制转换成<code>PyASCIIObject</code>类型。这个话题放到后边再讲。</p>
+<p>如同这个函数名所描述的，这是用来删除已知<code>hash</code>值的元素的方法。</p>
+<p>实际上，这个函数只是找到了需要删除的元素的位置，之后调用了<code>delitem_common</code>函数，才真正执行了删除元素、转变状态和调整使用情况。</p>
+<p>在<code>Python 2</code>中一个函数完成的工作，在<code>Python 3</code>中被分到了三个函数当中。</p>
+<p>不过，在调用<code>delitem_common</code>之前，还有一步工作要做。</p>
+<p>由于<code>Python 3</code>中的<code>dict</code>布局会给删除元素带来一定的不变，所以有如下代码：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Split table doesn't allow deletion.  Combine it.</span></span><br><span class="line"><span class="keyword">if</span> (_PyDict_HasSplitTable(mp)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (dictresize(mp, DK_SIZE(mp-&gt;ma_keys))) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ix = (mp-&gt;ma_keys-&gt;dk_lookup)(mp, key, hash, &amp;value_addr, &amp;hashpos);</span><br><span class="line">    assert(ix &gt;= <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>先将<code>split table</code>(如果是的话)转换成<code>combune table</code>之后再进行删除。</p>
+<p>之后的删除操作就非常清晰了：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">delitem_common(PyDictObject *mp, Py_ssize_t hashpos, Py_ssize_t ix,</span><br><span class="line">               PyObject **value_addr)</span><br><span class="line">&#123;</span><br><span class="line">    PyObject *old_key, *old_value;</span><br><span class="line">    PyDictKeyEntry *ep;</span><br><span class="line"></span><br><span class="line">    old_value = *value_addr;</span><br><span class="line">    assert(old_value != <span class="literal">NULL</span>);</span><br><span class="line">    *value_addr = <span class="literal">NULL</span>;</span><br><span class="line">    mp-&gt;ma_used--;</span><br><span class="line">    mp-&gt;ma_version_tag = DICT_NEXT_VERSION();</span><br><span class="line">    ep = &amp;DK_ENTRIES(mp-&gt;ma_keys)[ix];</span><br><span class="line">    dk_set_index(mp-&gt;ma_keys, hashpos, DKIX_DUMMY);</span><br><span class="line">    ENSURE_ALLOWS_DELETIONS(mp);</span><br><span class="line">    old_key = ep-&gt;me_key;</span><br><span class="line">    ep-&gt;me_key = <span class="literal">NULL</span>;</span><br><span class="line">    Py_DECREF(old_key);</span><br><span class="line">    Py_DECREF(old_value);</span><br><span class="line"></span><br><span class="line">    assert(_PyDict_CheckConsistency(mp));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>将对应的指针置空，<code>slot</code>的状态变成<code>Dummy</code>，减少<code>used</code>和引用计数之类的工作，全部在这个函数中完成。</p>
+<p><code>Python 3</code>中的<code>dict</code>对象的实现基本上就是这些，下一片大概会开始进行<code>Small Python</code>的内容。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/08/10/《Python源码剖析》阅读笔记14/">http://nagisa.co/2017/08/10/《Python源码剖析》阅读笔记14/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/09/11/《Python源码剖析》阅读笔记15/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记15</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/08/08/《Python源码剖析》阅读笔记13/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记13</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

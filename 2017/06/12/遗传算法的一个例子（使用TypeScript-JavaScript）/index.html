@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="遗传算法的一个例子（使用TypeScript/JavaScript）"/>
+
+
+
+
+  <meta name="keywords" content="JavaScript, 遗传算法, TypeScript, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/12/遗传算法的一个例子（使用TypeScript-JavaScript）/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 遗传算法的一个例子（使用TypeScript/JavaScript） - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          遗传算法的一个例子（使用TypeScript/JavaScript）
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-12
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#遗传算法"><span class="toc-text">遗传算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字符串模拟"><span class="toc-text">字符串模拟</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#种群和个体"><span class="toc-text">种群和个体</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#模拟遗传"><span class="toc-text">模拟遗传</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#评价函数"><span class="toc-text">评价函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#迭代方法"><span class="toc-text">迭代方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#演示"><span class="toc-text">演示</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <h2 id="遗传算法"><a href="#遗传算法" class="headerlink" title="遗传算法"></a>遗传算法</h2><p><a href="https://zh.wikipedia.org/wiki/%E9%81%97%E4%BC%A0%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">遗传算法（英语：genetic algorithm (GA) ）</a>是计算数学中用于解决最佳化的搜索算法，是进化算法的一种。进化算法最初是借鉴了进化生物学中的一些现象而发展起来的，这些现象包括遗传、突变、自然选择以及杂交等。<br><a id="more"></a></p>
+<h2 id="字符串模拟"><a href="#字符串模拟" class="headerlink" title="字符串模拟"></a>字符串模拟</h2><p>本文的例子由随机生成的字符串向目标字符串迭代。</p>
+<p>例如给出一个目标字符串：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Here we go!</span><br></pre></td></tr></table></figure></p>
+<p>生成一些随机字符串：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">O,&amp;7 oB@L~E</span><br><span class="line">P,&amp;\*~e6LwE</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>随机字符串通过某种方式向目标迭代，越来越接近目标字符串。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P,&amp;\*~e6LwE -&gt; P,&amp;\*~e6go! -&gt; Here*~e6go) -&gt; Here we go!</span><br></pre></td></tr></table></figure></p>
+<h2 id="种群和个体"><a href="#种群和个体" class="headerlink" title="种群和个体"></a>种群和个体</h2><p>每个个体都有自己的字符串，写成如下形式：<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Member &#123;</span><br><span class="line">    code: <span class="built_in">string</span></span><br><span class="line">    <span class="built_in">eval</span>: <span class="built_in">number</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>code</code>为该个体的字符串，<code>eval</code>则为其评价。每个个体都有自己的评价，并根据评价排序，在种群中进行繁衍（迭代）。</p>
+<p>种群的结构如下：<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> Group &#123;</span><br><span class="line">    goal: <span class="built_in">string</span></span><br><span class="line">    members: Member[]</span><br><span class="line">    genes: <span class="built_in">string</span></span><br><span class="line">    mutation_rate: <span class="built_in">number</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="模拟遗传"><a href="#模拟遗传" class="headerlink" title="模拟遗传"></a>模拟遗传</h2><p>遗传算法中比较重要的两部分，其一是迭代方法，也就是<strong>遗传</strong>、<strong>变异</strong>和<strong>杂交</strong>，其二则是评价函数，也就是<strong>适应性</strong>。</p>
+<h3 id="评价函数"><a href="#评价函数" class="headerlink" title="评价函数"></a>评价函数</h3><p>关于适应性的评价，在实际中要解决的问题或许是个非常复杂的问题。但在本例中，因为只是个Demo，所以评价函数也十分简单。</p>
+<p>将当前个体的字符串与目标字符串的差异量化成一个整数，这个数值越小则和目标越接近。</p>
+<p>假定字符串由字母组成，那么<code>ACE</code>与<code>ABD</code>相比，是后者更接近<code>ABC</code>，这个值则可以由其<code>ASCII</code>码值的方差决定，即：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="built_in">eval</span> = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; goal.length; i ++) &#123;</span><br><span class="line">    <span class="built_in">eval</span> += <span class="built_in">Math</span>.pow(goal.charCodeAt(i) - code.charCodeAt(i), <span class="number">2</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是本例中并不是使用的这种方式。</p>
+<p><code>ASCII</code>码值可以看成是由所有<code>ASCII</code>字符组成的字符串的下标，其中有一些是不能打印的字符，所以使用这种方式需要注意这一点。按照这种思路，即使不使用<code>ASCII</code>码值，只要有一个可以进行变异的元素集合就可以了。</p>
+<p>所以在<code>Group</code>类中引入了<code>genes</code>成员变量。这个变量出一个字符串，包含能够组成字符串的所有字符，也就是说，即使字符串由汉字组成也是可以的。只要<code>genes</code>变量中有足够的元素就可以。</p>
+<p>那么评价函数就不再是<code>ASCII</code>码值的方差，而是当前个体的<code>code</code>与<code>goal</code>的相同下标的字符在<code>genes</code>中下标的方差。</p>
+<p>在上例中，如果<code>genes</code>是<code>ABCEFGHIJKD</code>，那么<code>ACE</code>就比<code>ABD</code>更接近目标，因为根据下标方差所计算出的值，前者的<code>eval</code>是<code>2</code>，后者是<code>64</code>。</p>
+<p>这种计算方法的主要代码如下：<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">member.eval = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>.goal.length; i ++) &#123;</span><br><span class="line">    <span class="keyword">let</span> div = <span class="keyword">this</span>.genes.indexOf(member.code[i]) - <span class="keyword">this</span>.genes.indexOf(<span class="keyword">this</span>.goal[i])</span><br><span class="line">    member.eval += (div * div)</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>在本例中，默认的<code>genes</code>是一些<code>ASCII</code>字符。在开始迭代之前，将这些字符进行了随机打乱，这样可以使得文字在跳动的时候显得更“随机”一些。</p>
+<p>例如目标字符是<code>L</code>，如果初始字符是<code>A</code>，那么大致的趋势就会从<code>A</code>按照字母序变到<code>L</code>，如果是初始字符是<code>X</code>，则会按照逆字母序变化。</p>
+<p>将字符的顺序打乱之后，由于每个字符的前置字符和后置字符是不可预期的，所以变化顺序也就不可预测，<strong>看起来</strong>更随机一些。（其实没什么用处）</p>
+<h3 id="迭代方法"><a href="#迭代方法" class="headerlink" title="迭代方法"></a>迭代方法</h3><p>本例中的迭代方法分成三个部分，分别是<strong>交配(mate)</strong>、<strong>变异(mutate)</strong>和<strong>繁殖(propagate)</strong>。</p>
+<p>其中<strong>交配</strong>是个体行为，所以<code>mate</code>函数在<code>Member</code>类中实现。<strong>繁殖</strong>是种群行为，所以在<code>Group</code>类中实现。</p>
+<p><strong>变异</strong>，由于<code>genes</code>在<code>Group</code>类中，也为了减少函数的调用次数，<code>mutate</code>也在<code>Group</code>类中实现。</p>
+<p><strong>交配</strong>是最简单的，就像真核生物产生下一代时交换彼此的基因一样，这个函数交换双方的部分子字符串，组成新的两个个体：<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mate(other: Member) &#123;</span><br><span class="line">    <span class="keyword">let</span> mid = <span class="built_in">Math</span>.floor(<span class="keyword">this</span>.code.length / <span class="number">2</span>)</span><br><span class="line">    <span class="keyword">let</span> child1 = <span class="keyword">this</span>.code.substr(<span class="number">0</span>, mid) + other.code.substr(mid)</span><br><span class="line">    <span class="keyword">let</span> child2 = other.code.substr(<span class="number">0</span>, mid) + <span class="keyword">this</span>.code.substr(mid)</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">new</span> Member(child1), <span class="keyword">new</span> Member(child2)]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>变异</strong>函数也并不复杂，随机改变字符串中的一个字符的值，新字符的值是原字符在<code>genes</code>的前置元素或者后继元素。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">mutate() &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> m of <span class="keyword">this</span>.members) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">Math</span>.random() &lt; <span class="keyword">this</span>.mutation_rate) &#123;</span><br><span class="line">            <span class="keyword">let</span> index = <span class="built_in">Math</span>.floor(<span class="built_in">Math</span>.random() * (m.code.length))</span><br><span class="line">            <span class="keyword">let</span> front = m.code.substr(<span class="number">0</span>, index)</span><br><span class="line">            <span class="keyword">let</span> inalphas = <span class="keyword">this</span>.genes.indexOf(m.code[index])</span><br><span class="line">            <span class="keyword">let</span> change = <span class="number">0</span></span><br><span class="line">            <span class="keyword">if</span> (inalphas === <span class="number">0</span>) &#123;</span><br><span class="line">                change = <span class="number">1</span></span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (inalphas === <span class="keyword">this</span>.genes.length - <span class="number">1</span>) &#123;</span><br><span class="line">                change = <span class="number">-1</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                change = <span class="built_in">Math</span>.random() &gt; <span class="number">0.5</span> ? <span class="number">-1</span> : <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">let</span> mid = <span class="keyword">this</span>.genes[inalphas + change]</span><br><span class="line">            <span class="keyword">let</span> end = m.code.substr(index + <span class="number">1</span>)</span><br><span class="line">            m.code = front + mid + end</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>繁殖</strong>函数比前两个函数稍微复杂一些：<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">propagate() &#123;</span><br><span class="line">    <span class="keyword">this</span>.mutate()</span><br><span class="line">    <span class="keyword">let</span> size = <span class="keyword">this</span>.size()</span><br><span class="line">    <span class="keyword">let</span> index = <span class="built_in">Math</span>.floor(<span class="built_in">Math</span>.random() * size)</span><br><span class="line">    <span class="keyword">let</span> new_mems = <span class="keyword">this</span>.members[<span class="number">0</span>].mate(<span class="keyword">this</span>.members[index]).concat(<span class="keyword">this</span>.members)</span><br><span class="line">    <span class="keyword">this</span>.members = []</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">let</span> new_mem of new_mems) &#123;</span><br><span class="line">        <span class="keyword">let</span> not_in_memebers = <span class="literal">true</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">let</span> old_mem of <span class="keyword">this</span>.members) &#123;</span><br><span class="line">            <span class="keyword">if</span>(new_mem.equals(old_mem)) &#123;</span><br><span class="line">                not_in_memebers = <span class="literal">false</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(not_in_memebers) &#123;</span><br><span class="line">            <span class="keyword">this</span>.members.push(new_mem)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span>(<span class="keyword">this</span>.size() &lt; size) &#123;</span><br><span class="line">        <span class="keyword">this</span>.members.push(<span class="keyword">this</span>.born())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.evaluate_members()</span><br><span class="line">    <span class="keyword">this</span>.sort_by_eval()</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.size() &gt; size) &#123;</span><br><span class="line">        <span class="keyword">this</span>.members = <span class="keyword">this</span>.members.slice(<span class="number">0</span>, size)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在上述函数中，为了简化繁殖过程，只有评价最高（<code>eval</code>最小的个体）有繁殖的权利。之后，为防止种群最后全部同化进行了去重，如果去重后种群数量小于最初的设定值，则新增个体；如果种群数量大于最初设定值，则去掉评价最低（<code>eval</code>最大）的个体。</p>
+<h2 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h2><p>经过数代的迭代，种群中的个体的评价就会越来越高。最终，评价最高的个体会和<code>goal</code>一样。</p>
+<p>一个简单的演示如下：</p>
+<div style="width:100%;display:block;align:center;border:solid gray 5px;"><br><pre><span id="genetic-words-demo" style="display:block;text-align:center;font-family:Courier New;font-size: 40px;text-decoration: underline;">Goal will be displayed here.</span></pre><br><script type="text/javascript" src="https://cdn.rawgit.com/nagisatk/ScriptDemos/192ae689/GeneticAlgoDemo/genetic-words-demo.js"></script><br><br><button style="width:10%;margin-left:45%;" onclick="javascript:start();" id="b">Start</button><br></div>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/12/遗传算法的一个例子（使用TypeScript-JavaScript）/">http://nagisa.co/2017/06/12/遗传算法的一个例子（使用TypeScript-JavaScript）/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/JavaScript/">JavaScript</a>
+            
+              <a href="/tags/遗传算法/">遗传算法</a>
+            
+              <a href="/tags/TypeScript/">TypeScript</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/14/常用排序算法笔记(1)-插入排序(Insert-Sort)/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">常用排序算法笔记(1) - 插入排序(Insert Sort)</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/08/JavaScript的粒子效果库-particles-js/">
+        <span class="next-text nav-default">JavaScript的粒子效果库: particles.js</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

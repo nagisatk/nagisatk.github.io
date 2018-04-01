@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="《Python源码剖析》阅读笔记6"/>
+
+
+
+
+  <meta name="keywords" content="Python, Python源码剖析, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/07/11/《Python源码剖析》阅读笔记6/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 《Python源码剖析》阅读笔记6 - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          《Python源码剖析》阅读笔记6
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-07-11
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#PyUnicodeObject的intern机制"><span class="toc-text">PyUnicodeObject的intern机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字符缓冲池"><span class="toc-text">字符缓冲池</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字符串连接的效率问题"><span class="toc-text">字符串连接的效率问题</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>字符串的实现机制。</p>
+<a id="more"></a>
+<p>在<a href="http://nagisa.co/2017/07/07/%E3%80%8APython%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90%E3%80%8B%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B05/">上一篇笔记</a>中，提到<code>bytes</code>对象的最大长度略小于<code>PY_SSIZE_T_MAX</code>，<code>str</code>对象的最大长度则等于这个值，和<code>Python 2</code>中是一样的。</p>
+<h2 id="PyUnicodeObject的intern机制"><a href="#PyUnicodeObject的intern机制" class="headerlink" title="PyUnicodeObject的intern机制"></a>PyUnicodeObject的intern机制</h2><blockquote>
+<p><code>PyStringObject</code>对象的<code>intern</code>机制之目的是：对于被<code>intern</code>之后的字符串，比如“<code>Ruby</code>”，在整个<code>Python</code>的运行期间，系统中都只有唯一的一个与字符串“<code>Ruby</code>”对应的<code>PyStringObject</code>对象。</p>
+</blockquote>
+<p>可以看到<code>intern</code>机制的目的主要是为了节省内存，对已经创造过的对象重复利用。如书中所说，在没有<code>intern</code>机制的情况下，如果创建<code>100</code>个字面量为<code>Python</code>的字符串对象，那么就会使用<code>6 * 100</code>字节的内存；但有了<code>intern</code>机制，只需要使用<code>6</code>个字节的内存就足够了。</p>
+<p>但是在<code>Python 3</code>中，<code>PyBytesObject</code>是没有<code>intern</code>机制的。即：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>b = <span class="string">b'this'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c = <span class="string">b'this'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b <span class="keyword">is</span> c</span><br><span class="line"><span class="keyword">False</span></span><br></pre></td></tr></table></figure></p>
+<p><code>Python 3</code>中<code>PyUnicodeObject</code>的<code>intern</code>机制的实现和<code>Python 2</code>中<code>PyStringObject</code>的<code>intern</code>机制的实现几乎没有区别。</p>
+<p>两者都采用将新创建的字符串对象存入一个<code>PyDictObject</code>中，这个<code>PyDictObject</code>就叫做<code>interned</code>。如果新创建的字符串对象在<code>interned</code>中已经存在，那么就会将新创建的这个对象链接到已存在的对象。</p>
+<p>这就是所有字面量相同的字符串对象都对应同一个字符串对象的基本原理。</p>
+<p>在<code>Python 2</code>中，实现<code>intern</code>机制的函数是<code>PyString_InternInPlace</code>，在<code>Python 3</code>中，这个函数对应的则是<code>PyUnicode_InternInPlace</code>。</p>
+<p>在<code>Python 2</code>和<code>Python 3</code>之间还有一点不同：通过在<code>PyUnicode_InternInPlace</code>内部打标记，可以看到每次创建字符串对象都会调用这个函数（而且是<code>3</code>次），但在<code>PyUnicode_FromString</code>函数中是没有调用<code>PyUnicode_InternInPlace</code>函数的，它也不是<code>Python 3</code>创建<code>str</code>对象的默认函数。</p>
+<p>每次创建字符串对象都会使用<code>PyUnicode_New</code>函数创建新的字符串对象，但不是所有的新创建的字符串对象都会保留下来。在这个函数中：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">PyObject *</span><br><span class="line">PyUnicode_New(Py_ssize_t size, Py_UCS4 maxchar)</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    _PyUnicode_LENGTH(unicode) = size;</span><br><span class="line">    _PyUnicode_HASH(unicode) = <span class="number">-1</span>;</span><br><span class="line">    _PyUnicode_STATE(unicode).interned = <span class="number">0</span>; <span class="comment">//interned 被标记为0</span></span><br><span class="line">    _PyUnicode_STATE(unicode).kind = kind;</span><br><span class="line">    _PyUnicode_STATE(unicode).compact = <span class="number">1</span>;</span><br><span class="line">    _PyUnicode_STATE(unicode).ready = <span class="number">1</span>;</span><br><span class="line">    _PyUnicode_STATE(unicode).ascii = is_ascii;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到新创建的字符串对象的<code>interned</code>成员被标记为<code>0</code>。在实现<code>intern</code>机制的<code>PyString_InternInPlace</code>函数中有以下代码：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">PyUnicode_InternInPlace(PyObject **p)</span><br><span class="line">&#123;</span><br><span class="line">    PyObject *s = *p;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// [1]</span></span><br><span class="line">    <span class="keyword">if</span> (PyUnicode_CHECK_INTERNED(s))</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// [2]</span></span><br><span class="line">    t = PyDict_SetDefault(interned, s, s);</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// [3]</span></span><br><span class="line">    <span class="comment">/* The two references in interned are not counted by refcnt.</span></span><br><span class="line"><span class="comment">       The deallocator will take care of this */</span></span><br><span class="line">    Py_REFCNT(s) -= <span class="number">2</span>;</span><br><span class="line">    <span class="comment">// [4]</span></span><br><span class="line">    _PyUnicode_STATE(s).interned = SSTATE_INTERNED_MORTAL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到在<code>[1]</code>处，此函数检测对象的<code>interned</code>成员是否为<code>0</code>，如果不为<code>0</code>的话，说明这个对象已经在<code>interned</code>中了，那就什么都不做；在<code>[2]</code>处则是将不在<code>interned</code>中的对象加入<code>interned</code>这个<code>PyDictObject</code>；最后在<code>[4]</code>处将此对象的<code>interned</code>成员修改为<code>SSTATE_INTERNED_MORTAL</code>，这个常量表明这个对象是<strong>可销毁</strong>的，此外还有<code>SSTATE_INTERNED_IMMORTAL</code>，表示这个对象不可销毁，会与<code>Python</code>虚拟机同时被销毁（回收）。</p>
+<p>至于<code>[3]</code>处，这是由于以下原因：</p>
+<blockquote>
+<p>在将一个<code>PyStringObject</code>对象<code>a</code>的<code>PyObject</code>指针作为<code>key</code>和<code>value</code>添加到<code>interned</code>中时，<code>PyDictObject</code>对象会通过这两个指针对<code>a</code>的引用计数进行两次加<code>1</code>的操作。但是<code>Python</code>的设计者规定在<code>interned</code>中<code>a</code>的指针不能被视为对象<code>a</code>的有效引用，因为如果是有效引用的话，那么<code>a</code>的引用计数在<code>Python</code>结束之前永远都不可能为<code>0</code>，因为<code>interned</code>中至少有两个指针引用了<code>a</code>，那么删除<code>a</code>就永远不可能了，这显然是没有道理的。</p>
+</blockquote>
+<h2 id="字符缓冲池"><a href="#字符缓冲池" class="headerlink" title="字符缓冲池"></a>字符缓冲池</h2><p><code>Python 3</code>的<code>PyUnicodeObject</code>也有一个字符缓冲池，被初始化为：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> PyObject *unicode_latin1[<span class="number">256</span>] = &#123;<span class="literal">NULL</span>&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>和<code>PyBytesObject</code>的<code>characters</code>数组一样，这个数组只有在创建了单个字符的字符串对象时才会启用。如果新创建的字符串对象是长度为<code>1</code>的短字符串，<code>Python 3</code>会通过下面的函数来获得这个字符串：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> PyObject*</span><br><span class="line">get_latin1_char(<span class="keyword">unsigned</span> <span class="keyword">char</span> ch)</span><br><span class="line">&#123;</span><br><span class="line">    PyObject *unicode = unicode_latin1[ch];</span><br><span class="line">    <span class="keyword">if</span> (!unicode) &#123;</span><br><span class="line">        unicode = PyUnicode_New(<span class="number">1</span>, ch);</span><br><span class="line">        <span class="keyword">if</span> (!unicode)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        PyUnicode_1BYTE_DATA(unicode)[<span class="number">0</span>] = ch;</span><br><span class="line">        assert(_PyUnicode_CheckConsistency(unicode, <span class="number">1</span>));</span><br><span class="line">        unicode_latin1[ch] = unicode;</span><br><span class="line">    &#125;</span><br><span class="line">    Py_INCREF(unicode);</span><br><span class="line">    <span class="keyword">return</span> unicode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果这个字符串本来不存在，那么就创建它，将它的引用计数加<code>1</code>；如果它已经存在了，就只让它的引用计数加<code>1</code>。</p>
+<h2 id="字符串连接的效率问题"><a href="#字符串连接的效率问题" class="headerlink" title="字符串连接的效率问题"></a>字符串连接的效率问题</h2><p><code>Python</code>中使用<code>+</code>连接字符串效率低下，这一点在<code>Python 2</code>和<code>Python 3</code>中是一样的。前者调用<code>string_concat</code>函数，后者则调用<code>PyUnicode_Concat</code>函数：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">PyObject *</span><br><span class="line">PyUnicode_Concat(PyObject *left, PyObject *right)</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    left_len = PyUnicode_GET_LENGTH(left);</span><br><span class="line">    right_len = PyUnicode_GET_LENGTH(right);</span><br><span class="line">    <span class="keyword">if</span> (left_len &gt; PY_SSIZE_T_MAX - right_len) &#123;</span><br><span class="line">        PyErr_SetString(PyExc_OverflowError,</span><br><span class="line">                        <span class="string">"strings are too large to concat"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    new_len = left_len + right_len;</span><br><span class="line">    ...</span><br><span class="line">    result = PyUnicode_New(new_len, maxchar);</span><br><span class="line">    <span class="keyword">if</span> (result == <span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    _PyUnicode_FastCopyCharacters(result, <span class="number">0</span>, left, <span class="number">0</span>, left_len);</span><br><span class="line">    _PyUnicode_FastCopyCharacters(result, left_len, right, <span class="number">0</span>, right_len);</span><br><span class="line">    assert(_PyUnicode_CheckConsistency(result, <span class="number">1</span>));</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>像<code>Python 2</code>中一样，<code>Python 3</code>中连接两个字符串也会进行申请内存的操作（在<code>PyUnicode_New</code>中）产生新的<code>str</code>对象。如果大量的使用<code>+</code>进行多字符串合并，就会造成频繁的内存申请和释放，严重影响效率。</p>
+<p>所以官方推荐使用<code>join</code>操作，这个操作会调用<code>PyUnicode_Join</code>函数，这个函数则调用<code>_PyUnicode_JoinArray</code>完成操作。</p>
+<p>由于后者的一个参数是<code>list</code>或者<code>tuple</code>对象，所以无论其中包含多少个<code>str</code>对象，都只会有一个申请内存的操作，对于多个字符串的连接，可以极大的提高效率。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">PyObject *</span><br><span class="line">_PyUnicode_JoinArray(PyObject *separator, PyObject **items, Py_ssize_t seqlen)</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">/* There are at least two things to join, or else we have a subclass</span></span><br><span class="line"><span class="comment">     * of str in the sequence.</span></span><br><span class="line"><span class="comment">     * Do a pre-pass to figure out the total amount of space we'll</span></span><br><span class="line"><span class="comment">     * need (sz), and see whether all argument are strings.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    sz = <span class="number">0</span>;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; seqlen; i++) &#123;</span><br><span class="line">        <span class="keyword">size_t</span> add_sz;</span><br><span class="line">        item = items[i];</span><br><span class="line">        ...</span><br><span class="line">        add_sz = PyUnicode_GET_LENGTH(item);</span><br><span class="line">        item_maxchar = PyUnicode_MAX_CHAR_VALUE(item);</span><br><span class="line">        maxchar = Py_MAX(maxchar, item_maxchar);</span><br><span class="line">        <span class="keyword">if</span> (i != <span class="number">0</span>) &#123;</span><br><span class="line">            add_sz += seplen;</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">        sz += add_sz;</span><br><span class="line">        <span class="keyword">if</span> (use_memcpy &amp;&amp; last_obj != <span class="literal">NULL</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (PyUnicode_KIND(last_obj) != PyUnicode_KIND(item))</span><br><span class="line">                use_memcpy = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        last_obj = item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    res = PyUnicode_New(sz, maxchar);</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">if</span> (use_memcpy) &#123;</span><br><span class="line">        ... <span class="comment">// [5]</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        ... <span class="comment">// [6]</span></span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是进行<code>join</code>操作的主要代码，可以看到首先计算了合并结果的字符串大小，然后才申请内存，也就是连接多个字符串只需要调用一次<code>PyUnicode_New</code>函数，即<strong>只申请一次内存</strong>。</p>
+<p><code>[5]</code>和<code>[6]</code>处被注释的代码是将所有的字符串内容拷贝到新的<code>str</code>对象中的操作，涉及到两种不同的拷贝机制，代码略长，所以隐藏了。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/07/11/《Python源码剖析》阅读笔记6/">http://nagisa.co/2017/07/11/《Python源码剖析》阅读笔记6/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Python/">Python</a>
+            
+              <a href="/tags/Python源码剖析/">Python源码剖析</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/07/14/《Python源码剖析》阅读笔记7/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记7</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/07/07/《Python源码剖析》阅读笔记5/">
+        <span class="next-text nav-default">《Python源码剖析》阅读笔记5</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

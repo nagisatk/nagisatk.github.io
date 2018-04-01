@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="常用排序算法笔记(3) - 堆排序(Heap Sort)"/>
+
+
+
+
+  <meta name="keywords" content="Note, Sort Algorithm, Heap Sort, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/17/常用排序算法笔记-3-堆排序-Heap-Sort/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 常用排序算法笔记(3) - 堆排序(Heap Sort) - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          常用排序算法笔记(3) - 堆排序(Heap Sort)
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-17
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#堆排序"><span class="toc-text">堆排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码实现"><span class="toc-text">代码实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试"><span class="toc-text">测试</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>本文介绍了排序算法中的堆排序。<br><a id="more"></a></p>
+<h2 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h2><p><strong>堆排序</strong>使用的是优先队列，这一数据结构在<em>DSAA</em>的第6章中介绍，这种排序可以给出<code>O(N*log N)</code>的时间复杂度。<br><!-- more --><br><strong>优先队列</strong>的一种常见的实现方式是二叉堆。</p>
+<blockquote>
+<p>（二叉）堆是一棵被完全填满的二叉树，有可能的例外是底层，底层上的元素从左到右填入。这样的树被称为<strong>完全二叉树</strong>。</p>
+</blockquote>
+<blockquote>
+<p>一项重要的观察发现，因为完全二叉树很有规律，所以它可以使用一个数组表示而不需要指针。</p>
+</blockquote>
+<blockquote>
+<p>对于数组中任一位置i上的元素，其左儿子在位置2i上，右儿子在左儿子后的单元(2i+1上)中，它的父亲则在位置[i/2]（向下取整）上。</p>
+</blockquote>
+<p>在堆排序的实现中，重要的是下滤算法，也就是将二叉堆的插入操作。这是由于我们需要最终的数组呈现升序排列，如果需要最终的数组降序排列，那么就需要上滤算法。</p>
+<p>这两种算法都是将新插入的元素放到合适的位置。例如，在下滤算法中，新插入的元素应当插入数组的末尾。但如果新的元素大于新位置的父元素，那么这个位置就是错的，就需要将父元素挪到这个新位置，在数组的中间留下一个空穴。当然，空穴的位置也不一定是正确的位置，新元素与空穴的父元素进行比较，如果依旧是错误的，那么就将空穴的父元素挪动空穴的位置，创建一个新的空穴。一直循环到新元素找到合适的位置。</p>
+<p>当然，由于排序数组是已经固定的，没有新的位置。下滤算法只是将所有的元素都调整到合适的位置。当所有的元素都在二叉堆中占据了合适的位置，那么起始位置的元素就是所有元素中最大的。最大元素应该位于数组的最后，所以交换起始位置和末尾位置元素，并将末尾元素(也就是新的起始元素)下滤到合适的位置。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>堆排序的代码实现要稍微复杂一些，有三个函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">PercDown</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> i, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> child;</span><br><span class="line">    <span class="keyword">int</span> tmp;</span><br><span class="line">    <span class="keyword">for</span>(tmp = eles[i]; LeftChild(i) &lt; n; i = child) &#123;</span><br><span class="line">        child = LeftChild(i);</span><br><span class="line">        <span class="keyword">if</span>(child != n - <span class="number">1</span> &amp;&amp; eles[child + <span class="number">1</span>] &gt; eles[child])</span><br><span class="line">            child++;</span><br><span class="line">        <span class="keyword">if</span>(tmp &lt; eles[child])</span><br><span class="line">            eles[i] = eles[child];</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    eles[i] = tmp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span> *a, <span class="keyword">int</span> *b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> t = *a;</span><br><span class="line">    *a = *b;</span><br><span class="line">    *b = t;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">HeapSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">for</span>(i = n / <span class="number">2</span>; i &gt;= <span class="number">0</span>; i--)</span><br><span class="line">        PercDown(eles, i, n);</span><br><span class="line">    <span class="keyword">for</span>(i = n - <span class="number">1</span>; i &gt; <span class="number">0</span>; i--) &#123;</span><br><span class="line">        swap(&amp;eles[<span class="number">0</span>], &amp;eles[i]);</span><br><span class="line">        PercDown(eles, <span class="number">0</span>, i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>堆排序被认为是一种非常稳定的排序算法，平均时间只比最坏情形界略少。</p>
+<p>下面是其中一次的结果：</p>
+<table>
+<thead>
+<tr>
+<th>MinValue</th>
+<th>MaxValue</th>
+<th>Numbers</th>
+<th>Used Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>31</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>31</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>131072</td>
+<td>31</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>78</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>78</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>262144</td>
+<td>78</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>393216</td>
+<td>110</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>157</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>172</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>524288</td>
+<td>172</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>203</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>203</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>655360</td>
+<td>204</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>250</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>250</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>786432</td>
+<td>250</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>313</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>312</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>917504</td>
+<td>297</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>359</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>344</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1048576</td>
+<td>360</td>
+</tr>
+</tbody>
+</table>
+<p>使用的数据量和希尔排序相同，可以看到时间比使用Hibbard增量（<code>1, 3, 7, ..., 2^k - 1</code>）略少。</p>
+<p>但作者指出：</p>
+<blockquote>
+<p>然而，在实践中它却慢于使用Sedgewick增量序列的希尔排序。</p>
+</blockquote>
+<p>Sedgewick增量序列是希尔排序中已知最好的增量序列，但是我并没有实现使用这个增量序列的希尔算法，所以也没有证明这一点。</p>
+<p>下面是上面数据的可视化：</p>
+<p><canvas style="margin:0px 20%;width: 60%; background-color: gray;" id="blue"></canvas></p>
+<script type="text/javascript">
+        var data = [ 31, 31, 31, 78, 78, 78, 125, 125, 110, 157, 172, 172, 203, 203, 204, 250, 250, 250, 313, 312, 297, 359, 344, 360]
+        var canvas = document.getElementById('blue')
+        var ctx = canvas.getContext("2d")
+        canvas.width = canvas.offsetWidth
+        canvas.height = canvas.offsetHeight
+
+        var widht = canvas.offsetWidth
+        var height = canvas.offsetHeight
+        var delta = canvas.offsetWidth / 12
+        var x = 0
+        var max = 0
+        for(var k = 1; k < 4; k++) {
+            if(data[data.length - k] > max)
+                max = data[data.length - k]
+        }
+        ctx.fillStyle = 'black'
+        for(var i = 0; i < 30; i += 3) {
+            x += delta
+            for(var j = 0; j < 3; j ++) {
+                var y = Math.floor(data[i+j]/max * height * 0.9)
+                ctx.beginPath()
+                ctx.arc(Math.floor(x), height - y, 3, 0, 2*Math.PI, true)
+                ctx.fill()
+            }
+        }
+</script>
+
+<p>最后说两句题外话。</p>
+<p>上面提出最好的希尔排序的增量序列的Sedgewick是著名的算法书籍《算法》(现在是第4版)的作者，而他的博士导师则是著名的图灵奖获得者Knuth，也是大名鼎鼎的《计算机程序设计艺术》(<strong>TAOCP</strong>)的作者。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/17/常用排序算法笔记-3-堆排序-Heap-Sort/">http://nagisa.co/2017/06/17/常用排序算法笔记-3-堆排序-Heap-Sort/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Note/">Note</a>
+            
+              <a href="/tags/Sort-Algorithm/">Sort Algorithm</a>
+            
+              <a href="/tags/Heap-Sort/">Heap Sort</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/18/常用排序算法笔记-4-归并排序-Merge-Sort/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">常用排序算法笔记(4) - 归并排序(Merge Sort)</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/16/常用排序算法笔记-2-希尔排序-Shell-Sort/">
+        <span class="next-text nav-default">常用排序算法笔记(2) - 希尔排序(Shell Sort)</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>

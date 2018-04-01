@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+
+  <meta name="description" content="常用排序算法笔记(5) - 快速排序(Quick Sort)"/>
+
+
+
+
+  <meta name="keywords" content="Note, Sort Algorithm, Quick Sort, Coding Nagisa" />
+
+
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Coding Nagisa">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.6.0" />
+
+
+
+<link rel="canonical" href="http://nagisa.co/2017/06/18/常用排序算法笔记-5-快速排序-Quick-Sort/"/>
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.6.0" />
+
+
+
+
+
+
+  
+
+
+
+  <script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <title> 常用排序算法笔记(5) - 快速排序(Quick Sort) - Coding Nagisa </title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">Coding Nagisa</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    
+      <a href="/">
+        <li class="mobile-menu-item">
+          
+          
+            Home
+          
+        </li>
+      </a>
+    
+      <a href="/archives/">
+        <li class="mobile-menu-item">
+          
+          
+            Archives
+          
+        </li>
+      </a>
+    
+  </ul>
+</nav>
+
+    <div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">Coding Nagisa</a>
+</div>
+
+<nav class="site-navbar">
+  
+    <ul id="menu" class="menu">
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/">
+            
+            
+              Home
+            
+          </a>
+        </li>
+      
+        <li class="menu-item">
+          <a class="menu-item-link" href="/archives/">
+            
+            
+              Archives
+            
+          </a>
+        </li>
+      
+    </ul>
+  
+</nav>
+
+      </header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content">
+            
+  
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          常用排序算法笔记(5) - 快速排序(Quick Sort)
+        
+      </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2017-06-18
+        </span>
+        
+        
+      </div>
+    </header>
+
+    
+    
+  <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#快速排序"><span class="toc-text">快速排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码实现"><span class="toc-text">代码实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试"><span class="toc-text">测试</span></a></li></ol>
+    </div>
+  </div>
+
+
+    <div class="post-content">
+      
+        <p>本文介绍了排序算法中的快速排序。<br><a id="more"></a></p>
+<h2 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h2><blockquote>
+<p>正如它的名字所标示的，快速排序(quicksort)是在实践中最快的已知排序算法，它的平均运行时间是<code>O(N log N)</code>。该算法之所以特别快，主要是由于非常精炼和高度优化的内部循环。他的最坏情形的性能为<code>O(N</code><sup><code>2</code></sup><code>)</code>，但稍加努力就可避免这种情形。<br><!-- more --><br>将数组<code>S</code>排序的基本算法由下列简单的<code>4</code>步组成：</p>
+<ol>
+<li>如果<code>S</code>中元素个数是<code>0</code>或<code>1</code>，则返回。</li>
+<li>取<code>S</code>中任意元素<code>v</code>，称之为<strong>枢纽元(pivot)</strong>.</li>
+<li>将<code>S - {v}</code>(<code>S</code>中其余元素)分成两个不相交的集合：<code>S</code><sub><code>1</code></sub> <code>= {x ∈ S - {v} | x ≤ v}</code>和<code>S</code><sub><code>2</code></sub> <code>= {x ∈ S - {v} | x ≥ v}</code></li>
+<li>返回<code>{quicksort(S</code><sub><code>1</code></sub><code>)后，继随v，继而quicksort(S</code><sub><code>2</code></sub><code>)}</code></li>
+</ol>
+</blockquote>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>在选取枢纽元的时候，如果不小心选到了数组中的最大值或者最小值，那么分成的两个集合就会变成一个是空的，另一个是全部。这是非常糟糕的情况，所以在代码实现中，选取枢纽元使用了<strong>三数中值分割法</strong>，来保证每次取得的值不会是数组当中的最大值或者最小值。</p>
+<p>这个方法的实现如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">median3</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> center = (left + right) / <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">if</span>(eles[left] &gt; eles[center])</span><br><span class="line">        swap(&amp;eles[left], &amp;eles[center]);</span><br><span class="line">    <span class="keyword">if</span>(eles[left] &gt; eles[right])</span><br><span class="line">        swap(&amp;eles[left], &amp;eles[right]);</span><br><span class="line">    <span class="keyword">if</span>(eles[center] &gt; eles[right])</span><br><span class="line">        swap(&amp;eles[center], &amp;eles[right]);</span><br><span class="line">    swap(&amp;eles[center], &amp;eles[right - <span class="number">1</span>]);</span><br><span class="line">    <span class="keyword">return</span> eles[right - <span class="number">1</span>];</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其原理是取得数组的开始元素、结束元素和中间元素，然后将三者进行排序，取中间的那个。</p>
+<p>并将这个元素放在数组的倒数第二的位置上。这样可以为快速排序的分割提供一个警戒标识，防止越界。</p>
+<p>有了选取枢纽元的方法，就可以进行分割了：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> cutoff (3)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">QSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> left, <span class="keyword">int</span> right)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, j;</span><br><span class="line">    <span class="keyword">int</span> pivot;</span><br><span class="line">    <span class="keyword">if</span>(left + cutoff &lt;= right) &#123;</span><br><span class="line">        pivot  = median3(eles, left, right);</span><br><span class="line">        i = left;</span><br><span class="line">        j = right - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="comment">// 警戒标识的存在可以防止下面两句代码中的i,j越界</span></span><br><span class="line">            <span class="keyword">while</span>(eles[++i] &lt; pivot);</span><br><span class="line">            <span class="keyword">while</span>(eles[--j] &gt; pivot);</span><br><span class="line">            <span class="keyword">if</span>(i &lt; j)</span><br><span class="line">                swap(&amp;eles[i], &amp;eles[j]);</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        swap(&amp;eles[i], &amp;eles[right - <span class="number">1</span>]);</span><br><span class="line">        QSort(eles, left, i - <span class="number">1</span>);</span><br><span class="line">        QSort(eles, i + <span class="number">1</span>, right);</span><br><span class="line">    &#125; <span class="keyword">else</span></span><br><span class="line">        InsertSort(eles + left, right - left + <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>除了分割之外，当问题的规模太小时，上述算法中选择不使用快速排序，而是对这个小集合进行了插入排序。这是因为：</p>
+<blockquote>
+<p>对于很小的数组<code>(N &lt;= 20)</code>，快速排序不如插入排序好。不仅如此，因为快速排序是递归的，所以这样的情形还经常发生。通常的解决方法是对于小的数组不递归地使用快速排序，取而代之以插入排序这样的对小数组有效的排序算法。使用这种策略实际上可以节省大约<code>15%</code>(相对于自始至终使用快速排序时)的运行时间。</p>
+</blockquote>
+<p>下面是调用快速排序的入口：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">QuickSort</span><span class="params">(<span class="keyword">int</span> eles[], <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    QSort(eles, <span class="number">0</span>, n - <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><table>
+<thead>
+<tr>
+<th>MinValue</th>
+<th>MaxValue</th>
+<th>Numbers</th>
+<th>Used Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>15</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>31</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>100000</td>
+<td>16</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>200000</td>
+<td>63</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>200000</td>
+<td>34</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>200000</td>
+<td>47</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>300000</td>
+<td>62</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>300000</td>
+<td>81</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>300000</td>
+<td>62</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>400000</td>
+<td>81</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>400000</td>
+<td>78</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>400000</td>
+<td>79</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>500000</td>
+<td>93</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>500000</td>
+<td>94</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>500000</td>
+<td>78</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>600000</td>
+<td>110</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>600000</td>
+<td>110</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>600000</td>
+<td>109</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>700000</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>700000</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>700000</td>
+<td>125</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>800000</td>
+<td>141</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>800000</td>
+<td>141</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>800000</td>
+<td>140</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>900000</td>
+<td>156</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>900000</td>
+<td>156</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>900000</td>
+<td>171</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1000000</td>
+<td>172</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1000000</td>
+<td>187</td>
+</tr>
+<tr>
+<td>         0</td>
+<td>32767</td>
+<td>1000000</td>
+<td>172</td>
+</tr>
+</tbody>
+</table>
+<p><canvas style="margin:0px 20%;width: 60%; background-color: gray;" id="blue"></canvas></p>
+<script type="text/javascript">
+        var data = [15, 31, 16, 63, 34, 47, 62, 81, 62, 81, 78, 79, 93, 94, 78, 110, 110, 109, 125, 125, 125, 141, 141, 140, 156, 156, 171, 172, 187, 172]
+        var canvas = document.getElementById('blue')
+        var ctx = canvas.getContext("2d")
+        canvas.width = canvas.offsetWidth
+        canvas.height = canvas.offsetHeight
+
+        var widht = canvas.offsetWidth
+        var height = canvas.offsetHeight
+        var delta = canvas.offsetWidth / 12
+        var x = 0
+        var max = 0
+        for(var k = 1; k < 4; k++) {
+            if(data[data.length - k] > max)
+                max = data[data.length - k]
+        }
+        ctx.fillStyle = 'black'
+        for(var i = 0; i < 30; i += 3) {
+            x += delta
+            for(var j = 0; j < 3; j ++) {
+                var y = Math.floor(data[i+j]/max * height * 0.9)
+                ctx.beginPath()
+                ctx.arc(Math.floor(x), height - y, 3, 0, 2*Math.PI, true)
+                ctx.fill()
+            }
+        }
+</script>
+
+<p>测试的结果比插入排序当然要好得多，比归并排序也要稍好。不过，嗯，有点不稳定。</p>
+<p>如果将<code>cutoff</code>的值改成书中建议的<code>10</code>，效率也会不明显地提高一点，但是我不知道为什么书中的例程给出的<code>cutoff</code>的值是<code>3</code>而不是<code>10</code>。</p>
+
+      
+    </div>
+
+    
+      
+      
+
+  <div class="post-copyright">
+    <p class="copyright-item">
+      <span>Author: </span>
+      <a href="http://nagisa.co">Nagisa</a>
+    </p>
+    <p class="copyright-item">
+      <span>Link: </span>
+      <a href="http://nagisa.co/2017/06/18/常用排序算法笔记-5-快速排序-Quick-Sort/">http://nagisa.co/2017/06/18/常用排序算法笔记-5-快速排序-Quick-Sort/</a>
+    </p>
+    <p class="copyright-item">
+      <span>License: </span>
+      
+      <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a>
+    </p>
+  </div>
+
+
+
+      
+      
+    
+
+    
+      <footer class="post-footer">
+        
+          <div class="post-tags">
+            
+              <a href="/tags/Note/">Note</a>
+            
+              <a href="/tags/Sort-Algorithm/">Sort Algorithm</a>
+            
+              <a href="/tags/Quick-Sort/">Quick Sort</a>
+            
+          </div>
+        
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/29/《Python源码剖析》阅读笔记1/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">《Python源码剖析》阅读笔记1</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2017/06/18/常用排序算法笔记-4-归并排序-Merge-Sort/">
+        <span class="next-text nav-default">常用排序算法笔记(4) - 归并排序(Merge Sort)</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+      </footer>
+    
+
+  </article>
+
+
+          </div>
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+      </main>
+
+      <footer id="footer" class="footer">
+
+  <div class="social-links">
+    
+      
+        
+          <a href="mailto:nagisa_tk@outlook.com" class="iconfont icon-email" title="email"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        
+          <a href="https://github.com/nagisatk/" class="iconfont icon-github" title="github"></a>
+        
+      
+    
+      
+    
+      
+        
+          <a href="https://www.zhihu.com/people/cheng-yu-tong/" class="iconfont icon-zhihu" title="zhihu"></a>
+        
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+    
+    
+      
+      <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    
+  </div>
+
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">
+    
+    &copy; 
+     
+      2017 - 
+    
+    2018
+
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Nagisa</span>
+  </span>
+</div>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+
+    
+  
+  
+
+  
+
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+    <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  
+
+  
+
+
+    <script type="text/javascript" src="/js/src/even.js?v=2.6.0"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=2.6.0"></script>
+
+  </body>
+</html>
